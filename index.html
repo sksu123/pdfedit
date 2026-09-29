@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF 공작소</title>
+  
+  <meta name="theme-color" content="#E0E5EC" />
+
+  <!-- 뉴모피즘 테마 파비콘 -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23E0E5EC'/%3E%3Ccircle cx='32' cy='32' r='20' fill='%23E0E5EC' stroke='%234F46E5' stroke-width='4'/%3E%3Ctext x='32' y='37' font-family='sans-serif' font-size='16' font-weight='bold' fill='%234F46E5' text-anchor='middle'%3EPDF%3C/text%3E%3C/svg%3E" />
+
+  <!-- 데스크톱 앱 매니페스트 -->
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22PDF%20%EA%B3%B5%EC%9E%91%EC%86%8C%22%2C%22short_name%22%3A%22PDF%EA%B3%B5%EC%9E%91%EC%86%8C%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23E0E5EC%22%2C%22theme_color%22%3A%22%23E0E5EC%22%7D" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- pdf-lib CDN -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <!-- PDF.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap');
+    
+    body {
+      background-color: #E0E5EC;
+      color: #44475B;
+      font-family: 'Pretendard', -apple-system, sans-serif;
+    }
+
+    /* 뉴모피즘 볼록 효과 */
+    .neu-flat {
+      background: #E0E5EC;
+      box-shadow: 8px 8px 16px #bec3c9, -8px -8px 16px #ffffff;
+    }
+
+    .neu-flat-sm {
+      background: #E0E5EC;
+      box-shadow: 4px 4px 8px #bec3c9, -4px -4px 8px #ffffff;
+    }
+
+    /* 뉴모피즘 오목 효과 */
+    .neu-pressed {
+      background: #E0E5EC;
+      box-shadow: inset 5px 5px 10px #bec3c9, inset -5px -5px 10px #ffffff;
+    }
+
+    .neu-pressed-sm {
+      background: #E0E5EC;
+      box-shadow: inset 3px 3px 6px #bec3c9, inset -3px -3px 6px #ffffff;
+    }
+
+    /* 뉴모피즘 버튼 */
+    .neu-btn {
+      background: #E0E5EC;
+      box-shadow: 6px 6px 12px #bec3c9, -6px -6px 12px #ffffff;
+      transition: all 0.15s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .neu-btn:hover {
+      box-shadow: 4px 4px 8px #bec3c9, -4px -4px 8px #ffffff;
+      transform: translateY(1px);
+    }
+    .neu-btn:active {
+      box-shadow: inset 4px 4px 8px #bec3c9, inset -4px -4px 8px #ffffff;
+      transform: translateY(2px);
+    }
+    .neu-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: 2px 2px 4px #bec3c9, -2px -2px 4px #ffffff;
+    }
+
+    /* 메인 저장 버튼 */
+    .neu-btn-primary {
+      background: linear-gradient(145deg, #4f46e5, #4338ca);
+      color: #ffffff;
+      box-shadow: 6px 6px 14px #bec3c9, -6px -6px 14px #ffffff;
+      transition: all 0.15s ease;
+    }
+    .neu-btn-primary:hover {
+      background: linear-gradient(145deg, #4338ca, #3730a3);
+      box-shadow: 4px 4px 10px #bec3c9, -4px -4px 10px #ffffff;
+    }
+    .neu-btn-primary:active {
+      box-shadow: inset 4px 4px 8px rgba(0,0,0,0.3);
+      transform: translateY(1px);
+    }
+
+    /* 오목 슬라이더 트랙 및 볼록 노브 */
+    input[type=range].neu-slider {
+      -webkit-appearance: none;
+      background: #E0E5EC;
+      box-shadow: inset 3px 3px 6px #bec3c9, inset -3px -3px 6px #ffffff;
+      height: 10px;
+      border-radius: 5px;
+      outline: none;
+    }
+    input[type=range].neu-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #E0E5EC;
+      box-shadow: 3px 3px 6px #bec3c9, -3px -3px 6px #ffffff;
+      cursor: pointer;
+      border: 2px solid #4F46E5;
+      transition: all 0.15s ease;
+    }
+    input[type=range].neu-slider::-webkit-slider-thumb:active {
+      box-shadow: inset 2px 2px 4px #bec3c9, inset -2px -2px 4px #ffffff;
+    }
+
+    /* 토글 스위치 */
+    .neu-switch {
+      position: relative;
+      width: 48px;
+      height: 26px;
+      border-radius: 13px;
+      background: #E0E5EC;
+      box-shadow: inset 3px 3px 6px #bec3c9, inset -3px -3px 6px #ffffff;
+      cursor: pointer;
+      transition: background 0.25s ease;
+    }
+    .neu-switch .neu-switch-knob {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #E0E5EC;
+      box-shadow: 2px 2px 4px #bec3c9, -2px -2px 4px #ffffff;
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s;
+    }
+    .neu-switch.active .neu-switch-knob {
+      transform: translateX(22px);
+      background: #4F46E5;
+      box-shadow: 2px 2px 5px rgba(79, 70, 229, 0.4);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #E0E5EC; border-radius: 3px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #bec3c9; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen py-8 px-4 md:px-8">
+  <div class="max-w-6xl mx-auto space-y-7">
+    
+    <!-- 1. 상단 볼록 헤더 바 -->
+    <header class="neu-flat rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="text-center md:text-left space-y-1">
+        <h1 class="text-3xl md:text-4xl font-black tracking-tight text-[#2D3142]">
+          PDF 공작소
+        </h1>
+        <p class="text-xs md:text-sm font-semibold text-[#6C7289]">
+          1초 만에 끝내는 분할·회전·자르기·합체
+        </p>
+        <p class="text-[11px] font-medium text-[#8A90A6] pt-1">
+          Developed by 신경수(담양남초) · 100% PRIVATE LOCAL PROCESSING
+        </p>
+      </div>
+
+      <!-- 메인 저장 버튼 -->
+      <button id="btn-merge-all" class="neu-btn-primary px-7 py-4 rounded-2xl font-bold text-sm md:text-base flex items-center gap-3 transition cursor-pointer disabled:opacity-50 disabled:pointer-events-none" disabled>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+        <span id="btn-merge-front">선택 페이지 새 PDF로 저장</span>
+      </button>
+    </header>
+
+    <!-- 2. 뉴모피즘 위젯 대시보드 (원형 게이지 제거 후 풀 너비 정돈) -->
+    <section class="space-y-5">
+      <!-- 볼록 스탯 카드 2개 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div class="neu-flat rounded-2xl p-5 flex flex-col justify-between">
+          <span class="text-xs font-bold text-[#6C7289]">등록 문서</span>
+          <div class="flex items-baseline gap-2 mt-2">
+            <span id="stat-files-count" class="text-3xl font-black text-[#2D3142]">0</span>
+            <span class="text-xs font-bold text-[#8A90A6]">개 파일</span>
+          </div>
+          <div class="w-full h-1.5 neu-pressed-sm rounded-full mt-3 overflow-hidden">
+            <div id="stat-files-bar" class="h-full bg-[#4F46E5] rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="neu-flat rounded-2xl p-5 flex flex-col justify-between">
+          <span class="text-xs font-bold text-[#6C7289]">추출 대기 페이지</span>
+          <div class="flex items-baseline gap-2 mt-2">
+            <span id="stat-pages-count" class="text-3xl font-black text-[#2D3142]">0</span>
+            <span class="text-xs font-bold text-[#8A90A6]">개 페이지</span>
+          </div>
+          <div class="w-full h-1.5 neu-pressed-sm rounded-full mt-3 overflow-hidden">
+            <div id="stat-pages-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 오목 슬라이더(볼록 노브) + 토글 스위치 컨트롤 카드 -->
+      <div class="neu-flat rounded-2xl p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+          
+          <!-- 직인 날인 직경 슬라이더 -->
+          <div class="flex-1 space-y-2">
+            <div class="flex justify-between items-center text-xs font-bold">
+              <span class="text-[#6C7289]">직인 날인 직경</span>
+              <span id="stamp-size-val" class="text-[#4F46E5] font-black">25mm</span>
+            </div>
+            <input type="range" id="stamp-size" min="10" max="60" value="25" class="neu-slider w-full cursor-pointer" />
+          </div>
+
+          <!-- 쪽 번호 토글 (기본 켜짐) -->
+          <div class="flex items-center gap-3 sm:pl-8 sm:border-l border-[#C8CED6]/60 shrink-0">
+            <div class="text-left sm:text-right">
+              <span class="text-xs font-bold text-[#2D3142] block">쪽 번호 인쇄</span>
+              <span class="text-[10px] text-[#8A90A6]">하단 중앙 넘버링</span>
+            </div>
+            <div id="toggle-page-number" class="neu-switch active shrink-0" role="checkbox" aria-checked="true">
+              <div class="neu-switch-knob"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 실무 작업 영역 (좌측 파일 업로드/직인 + 우측 페이지 썸네일 그리드) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-7">
+      
+      <!-- 좌측 패널 -->
+      <div class="lg:col-span-4 space-y-6">
+        
+        <!-- 문서 및 이미지 추가 -->
+        <div class="neu-flat rounded-3xl p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="font-extrabold text-[#2D3142] text-sm flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full neu-flat flex items-center justify-center text-xs font-black text-[#4F46E5]">1</span>
+              문서 및 이미지 추가
+            </h2>
+            <span id="file-count" class="text-[11px] font-bold px-3 py-1 rounded-full neu-pressed-sm text-[#4F46E5]">0개 파일</span>
+          </div>
+          
+          <div id="drop-zone" class="neu-pressed rounded-2xl p-6 text-center cursor-pointer transition-colors group">
+            <div class="w-12 h-12 mx-auto rounded-full neu-flat text-[#4F46E5] flex items-center justify-center group-hover:scale-105 transition-transform">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+            </div>
+            <p class="mt-3 text-xs font-bold text-[#2D3142]">PDF 및 이미지(JPG, PNG)</p>
+            <p class="text-[11px] text-[#8A90A6] mt-0.5">파일을 끌어다 놓으세요</p>
+            <input type="file" id="pdf-input" class="hidden" accept="application/pdf, image/jpeg, image/png" multiple />
+          </div>
+
+          <!-- 파일 목록 -->
+          <ul id="file-list" class="space-y-2 text-xs font-semibold text-[#44475B] max-h-36 overflow-y-auto custom-scrollbar pr-1"></ul>
+        </div>
+
+        <!-- 투명 직인 / 서명 등록 -->
+        <div class="neu-flat rounded-3xl p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="font-extrabold text-[#2D3142] text-sm flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full neu-flat flex items-center justify-center text-xs font-black text-[#4F46E5]">2</span>
+              투명 직인 / 서명
+            </h2>
+          </div>
+          <p class="text-[11px] text-[#6C7289] leading-relaxed font-medium">
+            배경이 투명한 PNG 도장을 등록하고 우측 페이지 썸네일을 클릭하면 도장이 찍힙니다.
+          </p>
+
+          <div class="space-y-3">
+            <input type="file" id="stamp-input" accept="image/png" class="block w-full text-xs text-[#6C7289] file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:neu-btn file:text-[#4F46E5] cursor-pointer" />
+            
+            <div id="stamp-preview-box" class="hidden flex items-center gap-4 p-3 neu-pressed rounded-2xl">
+              <div class="w-14 h-14 neu-flat rounded-xl flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                <img id="stamp-preview" class="max-w-full max-h-full object-contain" alt="직인 미리보기" />
+              </div>
+              <div class="text-xs space-y-1">
+                <span class="font-bold text-[#2D3142] block">직인 준비 완료</span>
+                <span class="text-[10px] text-[#6C7289]">우측 썸네일 클릭 시 날인</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 보안 워터마크 -->
+        <div class="neu-flat rounded-3xl p-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="font-extrabold text-[#2D3142] text-sm flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full neu-flat flex items-center justify-center text-xs font-black text-[#4F46E5]">3</span>
+              보안 워터마크
+            </h2>
+            <div id="toggle-watermark" class="neu-switch shrink-0" role="checkbox" aria-checked="false">
+              <div class="neu-switch-knob"></div>
+            </div>
+          </div>
+          <div id="watermark-config" class="hidden space-y-2 pt-1">
+            <input type="text" id="watermark-text" value="CONFIDENTIAL" class="w-full px-3 py-2.5 neu-pressed rounded-xl text-xs font-extrabold text-[#2D3142] outline-none" />
+            <p class="text-[10px] text-[#8A90A6]">* 대각선 45도 반투명 텍스트 자동 삽입</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 우측 패널 (페이지 조작 보드 그리드) -->
+      <div class="lg:col-span-8 space-y-4">
+        <div class="neu-flat rounded-3xl p-6 min-h-[620px] flex flex-col">
+          
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-[#C8CED6]/40">
+            <h2 class="font-extrabold text-[#2D3142] text-sm flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full neu-flat flex items-center justify-center text-xs font-black text-[#4F46E5]">4</span>
+              페이지 조작 보드
+            </h2>
+            <div class="flex items-center gap-2.5">
+              <button id="btn-select-all" class="neu-btn px-3 py-1.5 rounded-xl text-xs font-bold text-[#44475B]">전체 선택</button>
+              <button id="btn-deselect-all" class="neu-btn px-3 py-1.5 rounded-xl text-xs font-bold text-[#44475B]">전체 해제</button>
+              <button id="btn-clear-all" class="neu-btn px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600">모두 비우기</button>
+            </div>
+          </div>
+
+          <!-- 빈 상태 메시지 -->
+          <div id="empty-state" class="flex-1 flex flex-col items-center justify-center text-[#8A90A6] py-24 space-y-3">
+            <div class="w-16 h-16 rounded-full neu-pressed flex items-center justify-center text-[#8A90A6]">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            </div>
+            <p class="text-sm font-bold text-[#2D3142]">등록된 문서 페이지가 없습니다.</p>
+            <p class="text-xs text-[#8A90A6]">좌측에서 PDF 및 이미지 파일을 끌어다 놓으세요.</p>
+          </div>
+
+          <!-- 페이지 카드 그리드 -->
+          <div id="pages-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 pt-6"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let pdfFiles = [];
+    let pageItems = [];
+    let stampImageBytes = null;
+    let stampDataUrl = null;
+
+    // DOM 캐싱
+    const pdfInput = document.getElementById('pdf-input');
+    const dropZone = document.getElementById('drop-zone');
+    const fileListEl = document.getElementById('file-list');
+    const fileCountEl = document.getElementById('file-count');
+    const pagesGrid = document.getElementById('pages-grid');
+    const emptyState = document.getElementById('empty-state');
+    const btnMergeAll = document.getElementById('btn-merge-all');
+    const btnMergeFront = document.getElementById('btn-merge-front');
+    const stampInput = document.getElementById('stamp-input');
+    const stampPreviewBox = document.getElementById('stamp-preview-box');
+    const stampPreview = document.getElementById('stamp-preview');
+    const stampSizeInput = document.getElementById('stamp-size');
+    const stampSizeVal = document.getElementById('stamp-size-val');
+    
+    // 대시보드 스탯 요소
+    const statFilesCount = document.getElementById('stat-files-count');
+    const statFilesBar = document.getElementById('stat-files-bar');
+    const statPagesCount = document.getElementById('stat-pages-count');
+    const statPagesBar = document.getElementById('stat-pages-bar');
+    const togglePageNumber = document.getElementById('toggle-page-number');
+    const toggleWatermark = document.getElementById('toggle-watermark');
+    const watermarkConfig = document.getElementById('watermark-config');
+
+    // 토글 인터랙션
+    togglePageNumber.addEventListener('click', () => {
+      togglePageNumber.classList.toggle('active');
+    });
+
+    toggleWatermark.addEventListener('click', () => {
+      const isActive = toggleWatermark.classList.toggle('active');
+      watermarkConfig.classList.toggle('hidden', !isActive);
+    });
+
+    // 드롭존 및 파일 선택
+    dropZone.addEventListener('click', () => pdfInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('bg-[#D5DAE2]'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('bg-[#D5DAE2]'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault(); dropZone.classList.remove('bg-[#D5DAE2]');
+      if (e.dataTransfer.files.length) handlePdfFiles(Array.from(e.dataTransfer.files));
+    });
+    pdfInput.addEventListener('change', (e) => { if (e.target.files.length) handlePdfFiles(Array.from(e.target.files)); });
+
+    // 직인 이미지 로드
+    stampInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      stampImageBytes = await file.arrayBuffer();
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        stampDataUrl = ev.target.result;
+        stampPreview.src = stampDataUrl;
+        stampPreviewBox.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    stampSizeInput.addEventListener('input', (e) => { stampSizeVal.textContent = `${e.target.value}mm`; });
+
+    // 이미지 파일을 PDF 버퍼로 변환 (A4 규격)
+    async function convertImageToPdfBuffer(file, arrayBuffer) {
+      const tempPdf = await PDFLib.PDFDocument.create();
+      const page = tempPdf.addPage([595.28, 841.89]);
+      let img;
+      if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
+        img = await tempPdf.embedJpg(arrayBuffer);
+      } else if (file.type === 'image/png') {
+        img = await tempPdf.embedPng(arrayBuffer);
+      }
+      if (!img) return null;
+
+      const { width, height } = page.getSize();
+      const imgDims = img.scaleToFit(width - 40, height - 40); 
+      page.drawImage(img, {
+        x: (width - imgDims.width) / 2,
+        y: (height - imgDims.height) / 2,
+        width: imgDims.width,
+        height: imgDims.height,
+      });
+      const bytes = await tempPdf.save();
+      return bytes.buffer.slice(0) || bytes;
+    }
+
+    // 파일 로드 및 분류
+    async function handlePdfFiles(files) {
+      const validFiles = files.filter(f => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf') || f.type.startsWith('image/'));
+      if (validFiles.length === 0) return;
+
+      for (const file of validFiles) {
+        const fileId = 'file_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+        let arrayBuffer = await file.arrayBuffer();
+
+        if (file.type.startsWith('image/')) {
+          const pdfBuffer = await convertImageToPdfBuffer(file, arrayBuffer);
+          if (!pdfBuffer) continue;
+          arrayBuffer = pdfBuffer;
+        }
+        
+        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer.slice(0) });
+        const pdfjsDoc = await loadingTask.promise;
+
+        pdfFiles.push({ id: fileId, name: file.name, arrayBuffer });
+
+        for (let i = 1; i <= pdfjsDoc.numPages; i++) {
+          const page = await pdfjsDoc.getPage(i);
+          const pageId = `${fileId}_p${i}`;
+          pageItems.push({
+            id: pageId,
+            fileId: fileId,
+            fileName: file.name,
+            pageIndex: i - 1,
+            pageNumber: i,
+            pdfjsPage: page,
+            rotation: 0,
+            cropPercent: 0,
+            selected: true,
+            stamps: []
+          });
+        }
+      }
+      updateUI();
+    }
+
+    // UI 동기화
+    function updateUI() {
+      fileCountEl.textContent = `${pdfFiles.length}개 파일`;
+      statFilesCount.textContent = pdfFiles.length;
+      statFilesBar.style.width = `${Math.min(pdfFiles.length * 20, 100)}%`;
+
+      const selectedPagesCount = pageItems.filter(p => p.selected).length;
+      statPagesCount.textContent = selectedPagesCount;
+      statPagesBar.style.width = `${Math.min(selectedPagesCount * 10, 100)}%`;
+      
+      fileListEl.innerHTML = pdfFiles.map((f, idx) => `
+        <li class="p-2.5 rounded-xl neu-flat-sm flex justify-between items-center text-[#44475B]">
+          <span class="truncate font-bold flex-1 mr-2 text-[11px]" title="${f.name}">${f.name}</span>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="text-[9px] neu-pressed-sm text-[#4F46E5] font-mono px-1.5 py-0.5 rounded">#${idx + 1}</span>
+            <button onclick="removeFile('${f.id}')" class="text-rose-400 hover:text-rose-600 transition-colors p-1" title="파일 삭제">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+        </li>
+      `).join('');
+
+      if (pageItems.length === 0) {
+        emptyState.classList.remove('hidden');
+        pagesGrid.innerHTML = '';
+        btnMergeAll.disabled = true;
+        return;
+      }
+      emptyState.classList.add('hidden');
+      btnMergeAll.disabled = !pageItems.some(p => p.selected);
+      renderGrid();
+    }
+
+    window.removeFile = function(fileId) {
+      if (!confirm('이 파일을 목록에서 삭제하시겠습니까?')) return;
+      pdfFiles = pdfFiles.filter(f => f.id !== fileId);
+      pageItems = pageItems.filter(p => p.fileId !== fileId);
+      updateUI();
+    };
+
+    // 썸네일 그리드 렌더링
+    function renderGrid() {
+      pagesGrid.innerHTML = '';
+
+      pageItems.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = `relative rounded-2xl p-3 flex flex-col items-center space-y-2.5 transition-all duration-150 ${
+          item.selected ? 'neu-flat ring-2 ring-[#4F46E5]' : 'neu-pressed opacity-60'
+        }`;
+
+        const canvasWrapper = document.createElement('div');
+        canvasWrapper.className = `relative w-full rounded-xl overflow-hidden neu-pressed bg-[#E0E5EC] ${stampDataUrl ? 'cursor-crosshair' : 'cursor-default'}`;
+        
+        const canvas = document.createElement('canvas');
+        canvas.className = 'w-full h-auto block';
+        canvasWrapper.appendChild(canvas);
+
+        const stampOverlay = document.createElement('div');
+        stampOverlay.className = 'absolute inset-0 pointer-events-none';
+        canvasWrapper.appendChild(stampOverlay);
+
+        const viewport = item.pdfjsPage.getViewport({ scale: 0.45, rotation: item.rotation });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        
+        const renderTask = item.pdfjsPage.render({ canvasContext: ctx, viewport: viewport });
+        
+        renderTask.promise.then(() => {
+          if (item.cropPercent > 0) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            const trimW = canvas.width * (item.cropPercent / 100);
+            const trimH = canvas.height * (item.cropPercent / 100);
+            
+            ctx.fillRect(0, 0, canvas.width, trimH);
+            ctx.fillRect(0, canvas.height - trimH, canvas.width, trimH);
+            ctx.fillRect(0, trimH, trimW, canvas.height - trimH * 2);
+            ctx.fillRect(canvas.width - trimW, trimH, trimW, canvas.height - trimH * 2);
+
+            ctx.strokeStyle = '#4F46E5';
+            ctx.setLineDash([6, 6]);
+            ctx.lineWidth = 2.5;
+            ctx.strokeRect(trimW, trimH, canvas.width - trimW * 2, canvas.height - trimH * 2);
+            ctx.setLineDash([]);
+          }
+        });
+
+        item.stamps.forEach((stamp, sIdx) => {
+          const stampImg = document.createElement('img');
+          stampImg.src = stampDataUrl;
+          stampImg.className = 'absolute pointer-events-auto cursor-pointer transition-transform hover:scale-110 drop-shadow-md';
+          stampImg.style.left = `${stamp.xRatio * 100}%`;
+          stampImg.style.top = `${stamp.yRatio * 100}%`;
+          stampImg.style.width = `${(stamp.widthMm / 210) * 100}%`;
+          stampImg.style.transform = 'translate(-50%, -50%)';
+          stampImg.title = '클릭하여 도장 삭제';
+          stampImg.onclick = (e) => { e.stopPropagation(); item.stamps.splice(sIdx, 1); renderGrid(); };
+          stampOverlay.appendChild(stampImg);
+        });
+
+        canvasWrapper.addEventListener('click', (e) => {
+          if (!stampImageBytes) return;
+          const rect = canvas.getBoundingClientRect();
+          item.stamps.push({
+            xRatio: (e.clientX - rect.left) / rect.width,
+            yRatio: (e.clientY - rect.top) / rect.height,
+            widthMm: parseFloat(stampSizeInput.value)
+          });
+          renderGrid();
+        });
+
+        // 카드 하단 컨트롤 바
+        const footer = document.createElement('div');
+        footer.className = 'w-full flex flex-wrap items-center justify-between gap-y-2 gap-x-1 text-xs pt-2 border-t border-[#C8CED6]/40';
+        footer.innerHTML = `
+          <label class="flex items-center gap-1.5 cursor-pointer select-none min-w-0">
+            <input type="checkbox" ${item.selected ? 'checked' : ''} class="w-4 h-4 rounded accent-[#4F46E5] cursor-pointer shrink-0" />
+            <span class="font-extrabold text-[#2D3142] truncate max-w-[55px]" title="${item.fileName}">${item.fileName.substring(0, 5)}..</span>
+            <span class="text-[9px] neu-pressed-sm text-[#4F46E5] font-black px-1.5 py-0.5 rounded shrink-0">p.${item.pageNumber}</span>
+          </label>
+          <div class="flex items-center gap-1 shrink-0 ml-auto">
+            <button class="btn-crop neu-btn w-6 h-6 rounded-lg flex items-center justify-center text-[10px]" title="여백 자르기">✂️</button>
+            <button class="btn-rotate neu-btn w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[11px]" title="90° 회전">↻</button>
+            <button class="btn-move-left neu-btn w-6 h-6 rounded-lg flex items-center justify-center text-[10px]" ${index === 0 ? 'disabled' : ''} title="앞으로">◀</button>
+            <button class="btn-move-right neu-btn w-6 h-6 rounded-lg flex items-center justify-center text-[10px]" ${index === pageItems.length - 1 ? 'disabled' : ''} title="뒤로">▶</button>
+          </div>
+        `;
+
+        footer.querySelector('input').addEventListener('change', (e) => { 
+          item.selected = e.target.checked; 
+          btnMergeAll.disabled = !pageItems.some(p => p.selected); 
+          updateUI();
+        });
+        footer.querySelector('.btn-crop').addEventListener('click', () => { item.cropPercent = (item.cropPercent + 5) % 25; renderGrid(); });
+        footer.querySelector('.btn-rotate').addEventListener('click', () => { item.rotation = (item.rotation + 90) % 360; renderGrid(); });
+        footer.querySelector('.btn-move-left').addEventListener('click', () => moveItem(index, index - 1));
+        footer.querySelector('.btn-move-right').addEventListener('click', () => moveItem(index, index + 1));
+
+        card.appendChild(canvasWrapper);
+        card.appendChild(footer);
+        pagesGrid.appendChild(card);
+      });
+    }
+
+    function moveItem(from, to) {
+      if (to < 0 || to >= pageItems.length) return;
+      const target = pageItems.splice(from, 1)[0];
+      pageItems.splice(to, 0, target);
+      renderGrid();
+    }
+
+    document.getElementById('btn-select-all').addEventListener('click', () => { pageItems.forEach(p => p.selected = true); updateUI(); });
+    document.getElementById('btn-deselect-all').addEventListener('click', () => { pageItems.forEach(p => p.selected = false); updateUI(); });
+    document.getElementById('btn-clear-all').addEventListener('click', () => { if (confirm('모두 삭제하시겠습니까?')) { pdfFiles = []; pageItems = []; updateUI(); }});
+
+    // 최종 PDF 생성 및 다운로드
+    btnMergeAll.addEventListener('click', async () => {
+      const selectedItems = pageItems.filter(p => p.selected);
+      if (selectedItems.length === 0) return;
+
+      btnMergeAll.disabled = true;
+      btnMergeFront.textContent = 'PDF 빌드 중...';
+
+      try {
+        const mergedPdf = await PDFLib.PDFDocument.create();
+        const helveticaFont = await mergedPdf.embedFont(PDFLib.StandardFonts.HelveticaBold);
+        let embeddedStamp = null;
+        if (stampImageBytes) embeddedStamp = await mergedPdf.embedPng(stampImageBytes);
+
+        const isPageNum = togglePageNumber.classList.contains('active');
+        const isWm = toggleWatermark.classList.contains('active');
+        const wmStr = document.getElementById('watermark-text').value.trim() || 'CONFIDENTIAL';
+
+        const loadedDocs = new Map();
+
+        for (let i = 0; i < selectedItems.length; i++) {
+          const item = selectedItems[i];
+          if (!loadedDocs.has(item.fileId)) {
+            const rawFile = pdfFiles.find(f => f.id === item.fileId);
+            loadedDocs.set(item.fileId, await PDFLib.PDFDocument.load(rawFile.arrayBuffer));
+          }
+          const srcDoc = loadedDocs.get(item.fileId);
+          const [copiedPage] = await mergedPdf.copyPages(srcDoc, [item.pageIndex]);
+          const addedPage = mergedPdf.addPage(copiedPage);
+
+          if (item.rotation !== 0) {
+            addedPage.setRotation(PDFLib.degrees(addedPage.getRotation().angle + item.rotation));
+          }
+
+          let { width, height } = addedPage.getSize();
+
+          if (item.cropPercent > 0) {
+            const trimW = width * (item.cropPercent / 100);
+            const trimH = height * (item.cropPercent / 100);
+            addedPage.setCropBox(trimW, trimH, width - trimW * 2, height - trimH * 2);
+          }
+
+          if (isWm) {
+            const wmSize = 48;
+            const textWidth = helveticaFont.widthOfTextAtSize(wmStr, wmSize);
+            addedPage.drawText(wmStr, { x: (width - textWidth) / 2, y: height / 2, size: wmSize, font: helveticaFont, color: PDFLib.rgb(0.31, 0.27, 0.9), opacity: 0.2, rotate: PDFLib.degrees(45) });
+          }
+
+          if (isPageNum) {
+            const numText = `- ${i + 1} / ${selectedItems.length} -`;
+            const numWidth = helveticaFont.widthOfTextAtSize(numText, 10);
+            addedPage.drawText(numText, { x: (width - numWidth) / 2, y: 20, size: 10, font: helveticaFont, color: PDFLib.rgb(0.3, 0.35, 0.45) });
+          }
+
+          if (item.stamps.length > 0 && embeddedStamp) {
+            for (const stamp of item.stamps) {
+              const stampWidthPt = stamp.widthMm * 2.83465;
+              const stampHeightPt = (stampWidthPt / embeddedStamp.width) * embeddedStamp.height;
+              addedPage.drawImage(embeddedStamp, {
+                x: (stamp.xRatio * width) - (stampWidthPt / 2),
+                y: height - (stamp.yRatio * height) - (stampHeightPt / 2),
+                width: stampWidthPt, height: stampHeightPt
+              });
+            }
+          }
+        }
+
+        const mergedPdfBytes = await mergedPdf.save();
+        const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `PDF_공작소_${new Date().toISOString().slice(0, 10)}.pdf`;
+        a.click();
+        URL.revokeObjectURL(downloadUrl);
+
+      } catch (err) {
+        alert('PDF 처리 중 오류가 발생했습니다: ' + err.message);
+      } finally {
+        btnMergeAll.disabled = false;
+        btnMergeFront.textContent = '선택 페이지 새 PDF로 저장';
+      }
+    });
+  </script>
+</body>
+</html>
