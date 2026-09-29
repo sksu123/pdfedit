@@ -1,10 +1,10 @@
 [README.md](https://github.com/user-attachments/files/32732386/README.md)
-# 📜 PDF 뚝딱공방 (Local Secure PDF Manager)
+# 📜 PDF공작소
 
 **1초 만에 끝내는 분할·회전·자르기·합체!**  
 서버 전송 없이 웹 브라우저 메모리 안에서만 동작하는 **100% 로컬 보안 PDF 편집기**입니다. 공문서, 영수증, 개인정보가 포함된 민감한 서류도 유출 걱정 없이 안전하게 가공할 수 있습니다.
 
-![PDF 뚝딱공방 미리보기](https://via.placeholder.com/800x400.png?text=Screenshot+Placeholder) <!-- 실제 캡처 화면 경로로 변경하세요 -->
+![PDF공작소 미리보기](https://via.placeholder.com/800x400.png?text=Screenshot+Placeholder) <!-- 실제 캡처 화면 경로로 변경하세요 -->
 
 ---
 
@@ -36,15 +36,8 @@
   * [PDF.js](https://mozilla.github.io/pdf.js/) (문서 렌더링 및 썸네일 미리보기)
 * **Architecture:** PWA (Progressive Web App) Ready
 
----
 
-## 🚀 사용 및 설치 방법 (How to Use)
-
-### 1. 웹에서 바로 사용하기
-별도의 설치 과정 없이 아래 링크에 접속하여 바로 사용할 수 있습니다.
-👉 **[PDF 뚝딱공방 실행하기](https://본인아이디.github.io/레포지토리이름/)** <!-- GitHub Pages 활성화 후 주소를 입력하세요 -->
-
-### 2. 바탕화면 앱으로 설치하기 (추천)
+### 바탕화면 앱으로 설치하기 (추천)
 매번 웹사이트에 접속할 필요 없이 내 컴퓨터에 전용 앱으로 설치해 보세요.
 1. Chrome 또는 Edge 브라우저로 위 접속 링크를 엽니다.
 2. 브라우저 주소창 우측 끝에 있는 **[ 💻 앱 다운로드(설치) ]** 아이콘을 클릭합니다.
