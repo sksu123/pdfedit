@@ -3,15 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PDF 공작소</title>
+  <title>PDF 공작소 - 학교 행정실 업무자동화</title>
   
   <meta name="theme-color" content="#E0E5EC" />
 
   <!-- 뉴모피즘 테마 파비콘 -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23E0E5EC'/%3E%3Ccircle cx='32' cy='32' r='20' fill='%23E0E5EC' stroke='%234F46E5' stroke-width='4'/%3E%3Ctext x='32' y='37' font-family='sans-serif' font-size='16' font-weight='bold' fill='%234F46E5' text-anchor='middle'%3EPDF%3C/text%3E%3C/svg%3E" />
-
-  <!-- 데스크톱 앱 매니페스트 -->
-  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22PDF%20%EA%B3%B5%EC%9E%91%EC%86%8C%22%2C%22short_name%22%3A%22PDF%EA%B3%B5%EC%9E%91%EC%86%8C%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23E0E5EC%22%2C%22theme_color%22%3A%22%23E0E5EC%22%7D" />
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,6 +19,8 @@
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   </script>
+  <!-- Tesseract.js v5 CDN (브라우저 로컬 한글/영문 OCR) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap');
@@ -32,29 +31,22 @@
       font-family: 'Pretendard', -apple-system, sans-serif;
     }
 
-    /* 뉴모피즘 볼록 효과 */
     .neu-flat {
       background: #E0E5EC;
       box-shadow: 8px 8px 16px #bec3c9, -8px -8px 16px #ffffff;
     }
-
     .neu-flat-sm {
       background: #E0E5EC;
       box-shadow: 4px 4px 8px #bec3c9, -4px -4px 8px #ffffff;
     }
-
-    /* 뉴모피즘 오목 효과 */
     .neu-pressed {
       background: #E0E5EC;
       box-shadow: inset 5px 5px 10px #bec3c9, inset -5px -5px 10px #ffffff;
     }
-
     .neu-pressed-sm {
       background: #E0E5EC;
       box-shadow: inset 3px 3px 6px #bec3c9, inset -3px -3px 6px #ffffff;
     }
-
-    /* 뉴모피즘 버튼 */
     .neu-btn {
       background: #E0E5EC;
       box-shadow: 6px 6px 12px #bec3c9, -6px -6px 12px #ffffff;
@@ -75,8 +67,6 @@
       cursor: not-allowed;
       box-shadow: 2px 2px 4px #bec3c9, -2px -2px 4px #ffffff;
     }
-
-    /* 메인 저장 버튼 */
     .neu-btn-primary {
       background: linear-gradient(145deg, #4f46e5, #4338ca);
       color: #ffffff;
@@ -92,7 +82,6 @@
       transform: translateY(1px);
     }
 
-    /* 오목 슬라이더 트랙 및 볼록 노브 */
     input[type=range].neu-slider {
       -webkit-appearance: none;
       background: #E0E5EC;
@@ -112,11 +101,7 @@
       border: 2px solid #4F46E5;
       transition: all 0.15s ease;
     }
-    input[type=range].neu-slider::-webkit-slider-thumb:active {
-      box-shadow: inset 2px 2px 4px #bec3c9, inset -2px -2px 4px #ffffff;
-    }
 
-    /* 토글 스위치 */
     .neu-switch {
       position: relative;
       width: 46px;
@@ -152,34 +137,35 @@
 <body class="min-h-screen py-8 px-4 md:px-8">
   <div class="max-w-6xl mx-auto space-y-7">
     
-    <!-- 1. 상단 볼록 헤더 바 -->
+    <!-- 1. 상단 헤더 바 -->
     <header class="neu-flat rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
       <div class="text-center md:text-left space-y-1">
-        <h1 class="text-3xl md:text-4xl font-black tracking-tight text-[#2D3142]">
-          PDF 공작소
-        </h1>
+        <div class="flex items-center gap-3 justify-center md:justify-start">
+          <h1 class="text-3xl md:text-4xl font-black tracking-tight text-[#2D3142]">
+            PDF 공작소
+          </h1>
+       </div>
         <p class="text-xs md:text-sm font-semibold text-[#6C7289]">
-          1초 만에 끝내는 분할·회전·자르기·합체
+          1초 만에 끝내는 분할·회전·자르기·합체 + 에듀파인 초경량 압축
         </p>
         <p class="text-[11px] font-medium text-[#8A90A6] pt-1">
           Developed by 신경수(담양남초) · 100% PRIVATE LOCAL PROCESSING
         </p>
       </div>
 
-      <!-- 메인 저장 버튼 -->
       <button id="btn-merge-all" class="neu-btn-primary px-7 py-4 rounded-2xl font-bold text-sm md:text-base flex items-center gap-3 transition cursor-pointer disabled:opacity-50 disabled:pointer-events-none" disabled>
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
         <span id="btn-merge-front">선택 페이지 새 PDF로 저장</span>
       </button>
     </header>
 
-    <!-- 2. 뉴모피즘 상단 스탯 카드 2개 -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <!-- 2. 상단 스탯 카드 3개 -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       <div class="neu-flat rounded-2xl p-5 flex flex-col justify-between">
-        <span class="text-xs font-bold text-[#6C7289]">등록 문서</span>
+        <span class="text-xs font-bold text-[#6C7289]">등록 문서 & 원본 용량</span>
         <div class="flex items-baseline gap-2 mt-2">
           <span id="stat-files-count" class="text-3xl font-black text-[#2D3142]">0</span>
-          <span class="text-xs font-bold text-[#8A90A6]">개 파일</span>
+          <span class="text-xs font-bold text-[#8A90A6]">개 파일 (<span id="stat-total-size">0 B</span>)</span>
         </div>
         <div class="w-full h-1.5 neu-pressed-sm rounded-full mt-3 overflow-hidden">
           <div id="stat-files-bar" class="h-full bg-[#4F46E5] rounded-full transition-all duration-300" style="width: 0%"></div>
@@ -196,12 +182,21 @@
           <div id="stat-pages-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: 0%"></div>
         </div>
       </div>
+
+      <div class="neu-flat rounded-2xl p-5 flex flex-col justify-between">
+        <span class="text-xs font-bold text-[#6C7289]">에듀파인 용량 다이어트</span>
+        <div class="flex items-baseline gap-2 mt-2">
+          <span id="stat-compress-status" class="text-2xl font-black text-[#2D3142]">다이어트 ON</span>
+          <span class="text-[11px] font-bold text-violet-600">표준 (~70%↓)</span>
+        </div>
+        <p class="text-[11px] font-semibold text-[#8A90A6] mt-1">에듀파인 10MB 첨부 한도 안심 통과</p>
+      </div>
     </section>
 
-    <!-- 3. 실무 작업 영역 (좌측 4개 섹션 + 우측 페이지 관리 그리드) -->
+    <!-- 3. 실무 작업 영역 -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-7">
       
-      <!-- 좌측 패널 (1~4번 섹션) -->
+      <!-- 좌측 패널 (1~5번 섹션) -->
       <div class="lg:col-span-4 space-y-6">
         
         <!-- 1. 문서 및 이미지 추가 -->
@@ -223,43 +218,37 @@
             <input type="file" id="pdf-input" class="hidden" accept="application/pdf, image/jpeg, image/png" multiple />
           </div>
 
-          <!-- 파일 목록 -->
           <ul id="file-list" class="space-y-2 text-xs font-semibold text-[#44475B] max-h-36 overflow-y-auto custom-scrollbar pr-1"></ul>
         </div>
 
-        <!-- 2. 투명 직인 / 서명 (날인 직경 조절 슬라이더 포함) -->
+        <!-- 2. 에듀파인 용량 다이어트 (PDF 압축) -->
         <div class="neu-flat rounded-3xl p-6 space-y-4">
           <div class="flex items-center justify-between">
             <h2 class="font-extrabold text-[#2D3142] text-sm flex items-center gap-2">
               <span class="w-6 h-6 rounded-full neu-flat flex items-center justify-center text-xs font-black text-[#4F46E5]">2</span>
-              투명 직인 / 서명
+              에듀파인 용량 다이어트
             </h2>
+            <div id="toggle-compress" class="neu-switch active shrink-0" role="checkbox" aria-checked="true">
+              <div class="neu-switch-knob"></div>
+            </div>
           </div>
+          
           <p class="text-[11px] text-[#6C7289] leading-relaxed font-medium">
-            배경이 투명한 PNG 도장을 등록하고 우측 페이지 썸네일을 클릭하면 도장이 찍힙니다.
+            에듀파인 공문/지출 첨부 시 <strong class="text-[#4F46E5]">10MB 용량 초과 에러</strong>를 방지하기 위해 스마트 리샘플링 압축을 적용합니다.
           </p>
 
-          <div class="space-y-3.5">
-            <input type="file" id="stamp-input" accept="image/png" class="block w-full text-xs text-[#6C7289] file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:neu-btn file:text-[#4F46E5] cursor-pointer" />
-            
-            <div id="stamp-preview-box" class="hidden flex items-center gap-4 p-3 neu-pressed rounded-2xl">
-              <div class="w-12 h-12 neu-flat rounded-xl flex items-center justify-center p-1 shrink-0 overflow-hidden">
-                <img id="stamp-preview" class="max-w-full max-h-full object-contain" alt="직인 미리보기" />
-              </div>
-              <div class="text-xs space-y-0.5">
-                <span class="font-bold text-[#2D3142] block">직인 준비 완료</span>
-                <span class="text-[10px] text-[#6C7289]">우측 썸네일 클릭 시 날인</span>
-              </div>
+          <div id="compress-config" class="space-y-3 pt-1">
+            <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+              <label class="flex items-center gap-2 cursor-pointer neu-flat-sm p-2.5 rounded-xl">
+                <input type="radio" name="compress-mode" value="standard" checked class="accent-[#4F46E5]" />
+                <span>표준 압축 (~70%↓)</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer neu-flat-sm p-2.5 rounded-xl">
+                <input type="radio" name="compress-mode" value="maximum" class="accent-[#4F46E5]" />
+                <span>초강력 (~90%↓)</span>
+              </label>
             </div>
-
-            <!-- 직인 날인 직경 조절 슬라이더 -->
-            <div class="pt-2 border-t border-[#C8CED6]/40 space-y-2">
-              <div class="flex justify-between items-center text-xs font-bold">
-                <span class="text-[#6C7289]">날인 직경</span>
-                <span id="stamp-size-val" class="text-[#4F46E5] font-black">25mm</span>
-              </div>
-              <input type="range" id="stamp-size" min="10" max="60" value="25" class="neu-slider w-full cursor-pointer" />
-            </div>
+            <p class="text-[10px] text-violet-700 font-bold">* 스캔 배경 비트맵만 경량화되며, 삽입한 그림·글자 및 쪽번호는 또렷하게 유지됩니다.</p>
           </div>
         </div>
 
@@ -280,7 +269,7 @@
           </div>
         </div>
 
-        <!-- 4. 쪽번호 인쇄 (신설 섹션: 스타일 선택 기능 포함) -->
+        <!-- 4. 쪽번호 인쇄 -->
         <div class="neu-flat rounded-3xl p-6 space-y-4">
           <div class="flex items-center justify-between">
             <h2 class="font-extrabold text-[#2D3142] text-sm flex items-center gap-2">
@@ -312,7 +301,6 @@
                 <span class="font-semibold text-[#2D3142]">- 1 / 3 - (공문서 표준)</span>
               </label>
             </div>
-            <p class="text-[10px] text-[#8A90A6]">* 인쇄 위치: 하단 중앙 여백</p>
           </div>
         </div>
 
@@ -322,19 +310,27 @@
       <div class="lg:col-span-8 space-y-4">
         <div class="neu-flat rounded-3xl p-6 min-h-[620px] flex flex-col">
           
-          <div class="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-[#C8CED6]/40">
-            <h2 class="font-extrabold text-[#2D3142] text-sm flex items-center gap-2">
-              <span class="w-6 h-6 rounded-full neu-flat flex items-center justify-center text-xs font-black text-[#4F46E5]">5</span>
-              페이지 조작 보드
-            </h2>
-            <div class="flex items-center gap-2.5">
-              <button id="btn-select-all" class="neu-btn px-3 py-1.5 rounded-xl text-xs font-bold text-[#44475B]">전체 선택</button>
-              <button id="btn-deselect-all" class="neu-btn px-3 py-1.5 rounded-xl text-xs font-bold text-[#44475B]">전체 해제</button>
-              <button id="btn-clear-all" class="neu-btn px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600">모두 비우기</button>
+          <div class="flex flex-col gap-2.5 pb-5 border-b border-[#C8CED6]/40">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <h2 class="font-extrabold text-[#2D3142] text-sm flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-full neu-flat flex items-center justify-center text-xs font-black text-[#4F46E5]">5</span>
+                  페이지 조작 보드
+                </h2>
+                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full neu-pressed-sm text-[#4F46E5]">마우스로 끌어서 순서 변경 가능</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <button id="btn-select-all" class="neu-btn px-3 py-1.5 rounded-xl text-xs font-bold text-[#44475B]">전체 선택</button>
+                <button id="btn-deselect-all" class="neu-btn px-3 py-1.5 rounded-xl text-xs font-bold text-[#44475B]">전체 해제</button>
+                <button id="btn-clear-all" class="neu-btn px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600">모두 비우기</button>
+              </div>
             </div>
+            <p class="text-[11px] font-semibold text-[#6C7289] flex items-center gap-1.5 pl-0.5">
+              <span class="text-[#4F46E5]">🔍</span>
+              <span>각 페이지 카드를 클릭하면 확대 편집 창(글자·그림 삽입, 회전, 범위 글자 인식·복사)이 열립니다.</span>
+            </p>
           </div>
 
-          <!-- 빈 상태 메시지 -->
           <div id="empty-state" class="flex-1 flex flex-col items-center justify-center text-[#8A90A6] py-24 space-y-3">
             <div class="w-16 h-16 rounded-full neu-pressed flex items-center justify-center text-[#8A90A6]">
               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -343,7 +339,6 @@
             <p class="text-xs text-[#8A90A6]">좌측에서 PDF 및 이미지 파일을 끌어다 놓으세요.</p>
           </div>
 
-          <!-- 페이지 카드 그리드 -->
           <div id="pages-grid" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4 pt-6"></div>
         </div>
       </div>
@@ -351,13 +346,235 @@
     </div>
   </div>
 
+  <!-- 결과 모달 -->
+  <div id="result-modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="neu-flat rounded-3xl p-7 max-w-md w-full space-y-5">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl neu-pressed flex items-center justify-center text-emerald-600 font-black text-xl">
+            ✓
+          </div>
+          <div>
+            <h3 class="font-extrabold text-[#2D3142] text-base">에듀파인 용량 다이어트 완료</h3>
+            <p class="text-[11px] font-semibold text-[#6C7289]">새 PDF 파일 다운로드가 시작되었습니다</p>
+          </div>
+        </div>
+        <button id="modal-close" class="neu-btn p-2 rounded-xl text-[#8A90A6] hover:text-[#2D3142]">✕</button>
+      </div>
+
+      <div class="p-4 neu-pressed rounded-2xl space-y-3">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-[#6C7289]">원본 선택 용량</span>
+          <span id="modal-orig-size" class="font-extrabold text-[#2D3142]">0 B</span>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-[#6C7289]">다이어트 생성 용량</span>
+          <span id="modal-new-size" class="font-black text-[#4F46E5] text-sm">0 B</span>
+        </div>
+        <div class="pt-2 border-t border-[#C8CED6]/40 flex justify-between items-center">
+          <span class="text-xs font-bold text-emerald-600">용량 절감율</span>
+          <span id="modal-pct" class="text-sm font-black text-emerald-600">-0% 절감</span>
+        </div>
+      </div>
+
+      <div id="modal-badge" class="p-3 rounded-2xl text-xs font-bold neu-pressed-sm text-emerald-700 bg-emerald-50/50">
+        ✅ 에듀파인 10MB 기준 완벽 통과! 안심하고 첨부하세요.
+      </div>
+
+      <div class="flex gap-3">
+        <a id="modal-redownload" href="#" download="" class="flex-1 neu-btn-primary py-3 rounded-xl text-center text-xs font-bold flex items-center justify-center gap-2">
+          <span>다시 다운로드</span>
+        </a>
+        <button id="modal-btn-close" class="neu-btn px-5 py-3 rounded-xl text-xs font-bold text-[#44475B]">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 페이지 확대 보기 & 고급 편집(글자/그림/양방향 회전/실행취소·다시실행) 모달 -->
+  <div id="zoom-modal" class="hidden fixed inset-0 z-50 bg-[#1E2230]/70 backdrop-blur-sm flex items-center justify-center p-3 md:p-6">
+    <div id="zoom-modal-panel" class="neu-flat rounded-3xl w-full max-w-6xl max-h-[94vh] flex flex-col overflow-hidden">
+      <!-- 상단 툴바 -->
+      <div class="px-5 py-3.5 border-b border-[#C8CED6]/50 flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <span id="zoom-page-badge" class="px-2.5 py-1 rounded-xl neu-pressed-sm text-xs font-black text-[#4F46E5] shrink-0">#1 / 1</span>
+          <div class="min-w-0">
+            <h3 id="zoom-file-title" class="font-extrabold text-[#2D3142] text-sm truncate max-w-[200px] sm:max-w-xs">문서.pdf</h3>
+            <p id="zoom-guide-text" class="text-[11px] font-semibold text-[#6C7289]">글자·그림 배치 후 드래그로 이동하고, 그림 모서리(↘)를 끌어 크기를 조절하세요</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="flex items-center gap-1 mr-1">
+            <button id="zoom-undo-btn" class="neu-btn px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#44475B]" title="실행 취소 (Ctrl+Z)" disabled>↶ 실행 취소</button>
+            <button id="zoom-redo-btn" class="neu-btn px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#44475B]" title="다시 실행 (Ctrl+Y)" disabled>↷ 다시 실행</button>
+          </div>
+          <div class="flex items-center gap-1 mr-1">
+            <button id="zoom-prev-btn" class="neu-btn px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#44475B]" title="이전 페이지">◀</button>
+            <button id="zoom-next-btn" class="neu-btn px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#44475B]" title="다음 페이지">▶</button>
+          </div>
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl neu-pressed-sm">
+            <button id="zoom-out-btn" class="px-1.5 font-black text-sm hover:text-[#4F46E5]" title="축소">－</button>
+            <span id="zoom-scale-label" class="text-xs font-black text-[#2D3142] w-11 text-center">135%</span>
+            <button id="zoom-in-btn" class="px-1.5 font-black text-sm hover:text-[#4F46E5]" title="확대">＋</button>
+          </div>
+          <div class="flex items-center gap-1">
+            <button id="zoom-rotate-left-btn" class="neu-btn px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#44475B]" title="반시계 방향(왼쪽) 90° 회전">↺ 왼쪽</button>
+            <button id="zoom-rotate-btn" class="neu-btn px-2.5 py-1.5 rounded-xl text-xs font-bold text-[#44475B]" title="시계 방향(오른쪽) 90° 회전">↻ 오른쪽</button>
+          </div>
+          <button id="zoom-close-btn" class="neu-btn-primary px-4 py-1.5 rounded-xl text-xs font-bold">✕ 닫기</button>
+        </div>
+      </div>
+
+      <!-- 편집 도구 탭 & 세부 옵션 바 -->
+      <div class="px-5 py-2.5 bg-[#D6DCE5]/55 border-b border-[#C8CED6]/40 space-y-2.5 shrink-0">
+        <!-- 도구 탭 + 현재 페이지 요소 초기화 -->
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" data-tool="text" class="zoom-tool-tab px-3 py-1.5 rounded-xl text-xs font-extrabold transition">🅣 글자 넣기</button>
+            <button type="button" data-tool="image" class="zoom-tool-tab px-3 py-1.5 rounded-xl text-xs font-extrabold transition">🖼️ 그림 넣기</button>
+            <button type="button" data-tool="ocr" class="zoom-tool-tab px-3 py-1.5 rounded-xl text-xs font-extrabold transition">🔍 범위 글자 인식</button>
+            <button type="button" data-tool="view" class="zoom-tool-tab px-3 py-1.5 rounded-xl text-xs font-extrabold transition">👁️ 보기만</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="zoom-active-count" class="text-[11px] font-bold text-[#6C7289]"></span>
+            <button id="zoom-clear-active-btn" class="hidden neu-btn px-2.5 py-1 rounded-lg text-[11px] font-bold text-rose-600">현재 도구 요소 지우기</button>
+          </div>
+        </div>
+
+        <!-- 1) 글자 넣기 옵션 바 -->
+        <div id="zoom-text-bar" class="hidden flex flex-wrap items-center gap-2.5 pt-1 border-t border-[#C8CED6]/40">
+          <textarea id="zoom-text-input" rows="1" placeholder="삽입할 글자를 입력하세요 (줄바꿈 가능)" class="px-3 py-1.5 neu-pressed rounded-xl text-xs font-bold text-[#2D3142] outline-none min-w-[180px] sm:w-56 resize-y"></textarea>
+
+          <select id="zoom-text-font" class="px-2.5 py-1.5 neu-flat-sm rounded-xl text-xs font-bold text-[#2D3142] outline-none cursor-pointer" title="글꼴 선택">
+            <option value="'Pretendard', 'Malgun Gothic', sans-serif">고딕체 (맑은고딕)</option>
+            <option value="'Batang', 'Noto Serif KR', Georgia, serif">바탕체 (명조)</option>
+            <option value="'Gungsuh', 'Gungseo', serif">궁서체</option>
+            <option value="'Dotum', 'Gulim', sans-serif">돋움체</option>
+            <option value="'Courier New', monospace">고정폭 (타자체)</option>
+          </select>
+
+          <div class="flex items-center gap-1.5 px-2.5 py-1 neu-pressed-sm rounded-xl">
+            <span class="text-[11px] font-bold text-[#6C7289]">크기</span>
+            <input type="range" id="zoom-text-size" min="8" max="60" value="16" class="neu-slider w-20 cursor-pointer" />
+            <span id="zoom-text-size-val" class="text-xs font-black text-[#4F46E5] w-9 text-right">16pt</span>
+          </div>
+
+          <button type="button" id="zoom-text-bold" class="neu-pressed ring-2 ring-[#4F46E5] text-[#4F46E5] px-2.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1" title="진하게 (굵게)">
+            <span>B</span><span>진하게</span>
+          </button>
+
+          <button type="button" id="zoom-text-italic" class="neu-flat-sm text-[#44475B] px-2.5 py-1.5 rounded-xl text-xs font-bold italic flex items-center gap-1" title="기울이기">
+            <span>I</span><span>기울기</span>
+          </button>
+
+          <div class="flex items-center gap-1.5 px-2 py-1 neu-flat-sm rounded-xl">
+            <button type="button" data-color="#1E293B" class="zoom-color-preset w-4 h-4 rounded-full border border-white shadow-xs hover:scale-110 transition ring-2 ring-[#4F46E5]" style="background-color:#1E293B" title="색상 #1E293B"></button>
+            <button type="button" data-color="#DC2626" class="zoom-color-preset w-4 h-4 rounded-full border border-white shadow-xs hover:scale-110 transition" style="background-color:#DC2626" title="색상 #DC2626"></button>
+            <button type="button" data-color="#2563EB" class="zoom-color-preset w-4 h-4 rounded-full border border-white shadow-xs hover:scale-110 transition" style="background-color:#2563EB" title="색상 #2563EB"></button>
+            <button type="button" data-color="#059669" class="zoom-color-preset w-4 h-4 rounded-full border border-white shadow-xs hover:scale-110 transition" style="background-color:#059669" title="색상 #059669"></button>
+            <button type="button" data-color="#4F46E5" class="zoom-color-preset w-4 h-4 rounded-full border border-white shadow-xs hover:scale-110 transition" style="background-color:#4F46E5" title="색상 #4F46E5"></button>
+            <input type="color" id="zoom-text-color" value="#1E293B" class="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0" title="사용자 지정 색상" />
+          </div>
+        </div>
+
+        <!-- 2) 그림 넣기 옵션 바 -->
+        <div id="zoom-image-bar" class="hidden flex flex-wrap items-center gap-2.5 pt-1 border-t border-[#C8CED6]/40">
+          <input type="file" id="zoom-image-input" accept="image/png, image/jpeg, image/jpg, image/webp" class="hidden" />
+          <button type="button" id="zoom-image-upload-btn" class="neu-btn px-3 py-1.5 rounded-xl text-xs font-extrabold text-[#4F46E5]">
+            🖼️ 그림/서명/도장 불러오기
+          </button>
+
+          <div id="zoom-image-controls" class="hidden flex flex-wrap items-center gap-2.5">
+            <div class="w-9 h-9 rounded-lg border border-[#C8CED6] flex items-center justify-center p-0.5 shrink-0 overflow-hidden" style="background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 8px 8px; background-position: 0 0, 0 4px, 4px -4px, -4px 0;" title="변환된 그림 미리보기">
+              <img id="zoom-image-preview" alt="미리보기" class="max-w-full max-h-full object-contain" />
+            </div>
+
+            <div class="flex flex-wrap items-center gap-1.5">
+              <button type="button" data-filter="original" class="zoom-img-filter px-2.5 py-1 rounded-xl text-[11px] font-bold transition neu-pressed ring-2 ring-[#4F46E5] text-[#4F46E5]">원본</button>
+              <button type="button" data-filter="remove-bg" class="zoom-img-filter px-2.5 py-1 rounded-xl text-[11px] font-bold transition neu-flat-sm text-[#44475B]">배경 제거</button>
+              <button type="button" data-filter="grayscale" class="zoom-img-filter px-2.5 py-1 rounded-xl text-[11px] font-bold transition neu-flat-sm text-[#44475B]">흑백</button>
+              <button type="button" data-filter="remove-bg-grayscale" class="zoom-img-filter px-2.5 py-1 rounded-xl text-[11px] font-bold transition neu-flat-sm text-[#44475B]">배경제거+흑백</button>
+              <button type="button" data-filter="bw-contrast" class="zoom-img-filter px-2.5 py-1 rounded-xl text-[11px] font-bold transition neu-flat-sm text-[#44475B]">선명 스캔</button>
+            </div>
+
+            <div id="zoom-image-threshold-wrap" class="hidden flex items-center gap-1.5 px-2.5 py-1 neu-pressed-sm rounded-xl">
+              <span class="text-[11px] font-bold text-[#6C7289]">배경 민감도</span>
+              <input type="range" id="zoom-image-threshold" min="160" max="250" value="225" class="neu-slider w-20 cursor-pointer" />
+            </div>
+
+            <div class="flex items-center gap-1.5 px-2.5 py-1 neu-pressed-sm rounded-xl">
+              <span class="text-[11px] font-bold text-[#6C7289]">기본 크기</span>
+              <input type="range" id="zoom-image-width" min="15" max="180" value="55" class="neu-slider w-20 cursor-pointer" />
+              <span id="zoom-image-width-val" class="text-xs font-black text-[#4F46E5] w-11 text-right">55mm</span>
+            </div>
+
+            <span id="zoom-image-place-hint" class="text-[11px] font-bold text-[#4F46E5] bg-indigo-50/80 px-2.5 py-1 rounded-xl">문서 위 원하는 위치를 클릭해 배치하세요</span>
+            <button type="button" id="zoom-image-rearm-btn" class="hidden neu-btn px-2.5 py-1 rounded-xl text-[11px] font-extrabold text-[#4F46E5]">+ 한 번 더 배치하기</button>
+          </div>
+
+          <span id="zoom-image-empty-hint" class="text-[11px] text-[#6C7289] font-medium">서명·도장·안내 이미지를 올리면 배경 제거·흑백 변환 후 첫 클릭으로 배치하고, 마우스로 바로 크기를 조절할 수 있습니다.</span>
+        </div>
+
+        <!-- 3) 범위 글자 인식 옵션 바 -->
+        <div id="zoom-ocr-bar" class="hidden flex flex-wrap items-center justify-between gap-2.5 pt-1 border-t border-[#C8CED6]/40">
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" data-ocr-mode="smart" class="zoom-ocr-mode-btn px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition neu-pressed ring-2 ring-[#4F46E5] text-[#4F46E5]">⚡ 스마트 (텍스트 우선 + 자동 OCR)</button>
+            <button type="button" data-ocr-mode="ocr-only" class="zoom-ocr-mode-btn px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition neu-flat-sm text-[#44475B]">🔍 정밀 이미지 OCR 전용 (한·영)</button>
+            <span class="text-[11px] font-semibold text-[#6C7289]">문서 위에서 마우스를 드래그하여 글자를 인식할 범위를 지정하세요</span>
+          </div>
+          <div id="zoom-ocr-top-actions" class="hidden flex items-center gap-1.5">
+            <button type="button" id="zoom-ocr-recheck-top-btn" class="neu-btn px-2.5 py-1 rounded-xl text-[11px] font-bold text-[#4F46E5]">🔄 이미지 OCR로 다시 인식</button>
+            <button type="button" id="zoom-ocr-clear-btn" class="neu-btn px-2.5 py-1 rounded-xl text-[11px] font-bold text-rose-600">영역 지우기</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 확대 캔버스 영역 -->
+      <div class="flex-1 overflow-auto custom-scrollbar p-6 bg-[#D5DAE2]/60 flex justify-center items-start">
+        <div id="zoom-canvas-container" class="relative rounded-xl overflow-hidden shadow-2xl bg-white transition-transform duration-150" style="width: 970px; max-width: none;">
+          <canvas id="zoom-canvas" class="w-full h-auto block pointer-events-none"></canvas>
+          <div id="zoom-ocr-marquee" class="hidden absolute pointer-events-none border-2 border-[#4F46E5] bg-[#4F46E5]/15 rounded-xs shadow-sm z-20">
+            <span id="zoom-ocr-marquee-badge" class="absolute -top-6 left-0 px-2 py-0.5 rounded bg-[#4F46E5] text-white text-[10px] font-extrabold whitespace-nowrap shadow">인식된 영역</span>
+          </div>
+          <img id="zoom-hover-ghost" class="hidden absolute pointer-events-none opacity-60 ring-2 ring-dashed ring-[#4F46E5]/60 rounded-sm" alt="미리보기" />
+          <div id="zoom-stamp-overlay" class="absolute inset-0 pointer-events-none"></div>
+        </div>
+      </div>
+
+      <!-- 범위 글자 인식 결과 & 복사 패널 -->
+      <div id="zoom-ocr-result-panel" class="hidden px-5 py-3.5 bg-[#E0E5EC] border-t border-[#C8CED6]/60 shrink-0">
+        <div class="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+          <div class="flex items-center gap-3 shrink-0">
+            <div id="zoom-ocr-preview-wrap" class="hidden w-24 h-16 rounded-xl neu-pressed-sm bg-white p-1 flex items-center justify-center overflow-hidden shrink-0">
+              <img id="zoom-ocr-preview-img" alt="선택 영역 미리보기" class="max-w-full max-h-full object-contain" />
+            </div>
+            <div class="space-y-1">
+              <div class="text-xs font-extrabold text-[#2D3142]">🔍 인식 결과</div>
+              <span id="zoom-ocr-engine-badge" class="inline-block px-2 py-0.5 rounded-lg bg-indigo-50 text-[#4F46E5] text-[10px] font-bold">대기</span>
+            </div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div id="zoom-ocr-loading-box" class="hidden neu-pressed rounded-xl px-4 py-3 text-xs font-bold text-[#4F46E5]">
+              <span id="zoom-ocr-progress-text">글자를 인식하는 중입니다...</span>
+            </div>
+            <textarea id="zoom-ocr-textarea" rows="3" placeholder="인식된 글자가 여기에 표시됩니다." class="w-full px-3.5 py-2 neu-pressed rounded-xl text-xs font-semibold text-[#2D3142] outline-none resize-y leading-relaxed"></textarea>
+            <p id="zoom-ocr-error-msg" class="hidden text-[11px] font-bold text-rose-600 mt-1"></p>
+          </div>
+          <div class="flex md:flex-col items-center justify-end gap-2 shrink-0">
+            <button type="button" id="zoom-ocr-copy-btn" class="neu-btn-primary px-4 py-2 rounded-xl text-xs font-bold">📋 글자 복사하기</button>
+            <button type="button" id="zoom-ocr-retry-btn" class="hidden neu-btn px-3 py-1.5 rounded-xl text-[11px] font-bold text-[#44475B]" title="글자가 깨지거나 이미지일 때 OCR로 다시 읽습니다">🔄 이미지 OCR 재인식</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     let pdfFiles = [];
     let pageItems = [];
-    let stampImageBytes = null;
-    let stampDataUrl = null;
+    let historyByPage = {};
 
-    // DOM 캐싱
     const pdfInput = document.getElementById('pdf-input');
     const dropZone = document.getElementById('drop-zone');
     const fileListEl = document.getElementById('file-list');
@@ -366,25 +583,34 @@
     const emptyState = document.getElementById('empty-state');
     const btnMergeAll = document.getElementById('btn-merge-all');
     const btnMergeFront = document.getElementById('btn-merge-front');
-    const stampInput = document.getElementById('stamp-input');
-    const stampPreviewBox = document.getElementById('stamp-preview-box');
-    const stampPreview = document.getElementById('stamp-preview');
-    const stampSizeInput = document.getElementById('stamp-size');
-    const stampSizeVal = document.getElementById('stamp-size-val');
     
-    // 대시보드 스탯 요소
     const statFilesCount = document.getElementById('stat-files-count');
+    const statTotalSize = document.getElementById('stat-total-size');
     const statFilesBar = document.getElementById('stat-files-bar');
     const statPagesCount = document.getElementById('stat-pages-count');
     const statPagesBar = document.getElementById('stat-pages-bar');
     
-    // 토글 및 부가 옵션 요소
+    const toggleCompress = document.getElementById('toggle-compress');
+    const compressConfig = document.getElementById('compress-config');
     const togglePageNumber = document.getElementById('toggle-page-number');
     const pageNumberConfig = document.getElementById('page-number-config');
     const toggleWatermark = document.getElementById('toggle-watermark');
     const watermarkConfig = document.getElementById('watermark-config');
 
-    // 토글 인터랙션
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    toggleCompress.addEventListener('click', () => {
+      const isActive = toggleCompress.classList.toggle('active');
+      compressConfig.classList.toggle('hidden', !isActive);
+      document.getElementById('stat-compress-status').textContent = isActive ? '다이어트 ON' : '원본 유지';
+    });
+
     togglePageNumber.addEventListener('click', () => {
       const isActive = togglePageNumber.classList.toggle('active');
       pageNumberConfig.classList.toggle('hidden', !isActive);
@@ -395,7 +621,6 @@
       watermarkConfig.classList.toggle('hidden', !isActive);
     });
 
-    // 드롭존 및 파일 선택
     dropZone.addEventListener('click', () => pdfInput.click());
     dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('bg-[#D5DAE2]'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('bg-[#D5DAE2]'));
@@ -405,23 +630,6 @@
     });
     pdfInput.addEventListener('change', (e) => { if (e.target.files.length) handlePdfFiles(Array.from(e.target.files)); });
 
-    // 직인 이미지 로드 및 크기 조절
-    stampInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      stampImageBytes = await file.arrayBuffer();
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        stampDataUrl = ev.target.result;
-        stampPreview.src = stampDataUrl;
-        stampPreviewBox.classList.remove('hidden');
-      };
-      reader.readAsDataURL(file);
-    });
-
-    stampSizeInput.addEventListener('input', (e) => { stampSizeVal.textContent = `${e.target.value}mm`; });
-
-    // 이미지 파일을 PDF 버퍼로 변환 (A4 규격)
     async function convertImageToPdfBuffer(file, arrayBuffer) {
       const tempPdf = await PDFLib.PDFDocument.create();
       const page = tempPdf.addPage([595.28, 841.89]);
@@ -445,7 +653,6 @@
       return bytes.buffer.slice(0) || bytes;
     }
 
-    // 파일 로드 및 분류
     async function handlePdfFiles(files) {
       const validFiles = files.filter(f => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf') || f.type.startsWith('image/'));
       if (validFiles.length === 0) return;
@@ -463,7 +670,7 @@
         const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer.slice(0) });
         const pdfjsDoc = await loadingTask.promise;
 
-        pdfFiles.push({ id: fileId, name: file.name, arrayBuffer });
+        pdfFiles.push({ id: fileId, name: file.name, size: file.size || arrayBuffer.byteLength, arrayBuffer });
 
         for (let i = 1; i <= pdfjsDoc.numPages; i++) {
           const page = await pdfjsDoc.getPage(i);
@@ -478,17 +685,156 @@
             rotation: 0,
             cropPercent: 0,
             selected: true,
-            stamps: []
+            texts: [],
+            images: []
           });
         }
       }
       updateUI();
     }
 
-    // UI 동기화
+    function dataUrlToUint8Array(dataUrl) {
+      const base64Data = dataUrl.split(',')[1];
+      const binaryString = atob(base64Data);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return bytes;
+    }
+
+    function drawCenteredImageOnPdfPage(addedPage, embeddedImg, xRatio, yRatio, widthMm) {
+      const { width: W, height: H } = addedPage.getSize();
+      const rot = ((addedPage.getRotation().angle % 360) + 360) % 360;
+      const visW = (rot === 90 || rot === 270) ? H : W;
+      const imgW = (widthMm / 210) * visW;
+      const imgH = (imgW / embeddedImg.width) * embeddedImg.height;
+
+      if (rot === 0) {
+        const cx = xRatio * W;
+        const cy = (1 - yRatio) * H;
+        addedPage.drawImage(embeddedImg, { x: cx - imgW / 2, y: cy - imgH / 2, width: imgW, height: imgH });
+      } else if (rot === 90) {
+        const cx = yRatio * W;
+        const cy = xRatio * H;
+        addedPage.drawImage(embeddedImg, { x: cx + imgH / 2, y: cy - imgW / 2, width: imgW, height: imgH, rotate: PDFLib.degrees(90) });
+      } else if (rot === 180) {
+        const cx = (1 - xRatio) * W;
+        const cy = yRatio * H;
+        addedPage.drawImage(embeddedImg, { x: cx + imgW / 2, y: cy + imgH / 2, width: imgW, height: imgH, rotate: PDFLib.degrees(180) });
+      } else {
+        const cx = (1 - yRatio) * W;
+        const cy = (1 - xRatio) * H;
+        addedPage.drawImage(embeddedImg, { x: cx - imgH / 2, y: cy + imgW / 2, width: imgW, height: imgH, rotate: PDFLib.degrees(-90) });
+      }
+    }
+
+    function renderTextToPng(opts) {
+      const supersample = 4;
+      const fontSizePx = opts.fontSizePt * supersample;
+      const lines = (opts.text || ' ').split('\n');
+      const lineHeight = fontSizePx * 1.35;
+      const pad = 6 * supersample;
+
+      const measureCanvas = document.createElement('canvas');
+      const mCtx = measureCanvas.getContext('2d');
+      const fontStr = `${opts.italic ? 'italic ' : ''}${opts.bold ? 'bold ' : ''}${fontSizePx}px ${opts.fontFamily}`;
+      mCtx.font = fontStr;
+
+      let maxLineWidth = 10 * supersample;
+      for (const line of lines) {
+        const w = mCtx.measureText(line || ' ').width;
+        if (w > maxLineWidth) maxLineWidth = w;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.ceil(maxLineWidth + pad * 2);
+      canvas.height = Math.ceil(lines.length * lineHeight + pad * 2);
+      const ctx = canvas.getContext('2d');
+      ctx.font = fontStr;
+      ctx.fillStyle = opts.color;
+      ctx.textBaseline = 'top';
+
+      lines.forEach((line, idx) => {
+        ctx.fillText(line, pad, pad + idx * lineHeight);
+      });
+
+      const widthPt = canvas.width / supersample;
+      const widthMm = widthPt / 2.83465;
+      return { dataUrl: canvas.toDataURL('image/png'), widthMm };
+    }
+
+    function processImageWithFilter(sourceDataUrl, filterMode, bgThreshold) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 1400;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            const scale = maxDim / Math.max(w, h);
+            w = Math.round(w * scale);
+            h = Math.round(h * scale);
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+
+          if (filterMode === 'original') {
+            resolve(canvas.toDataURL('image/png'));
+            return;
+          }
+
+          const imgData = ctx.getImageData(0, 0, w, h);
+          const data = imgData.data;
+
+          for (let i = 0; i < data.length; i += 4) {
+            let r = data[i];
+            let g = data[i + 1];
+            let b = data[i + 2];
+            let a = data[i + 3];
+
+            const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+            const sat = Math.max(r, g, b) - Math.min(r, g, b);
+
+            if (filterMode === 'remove-bg' || filterMode === 'remove-bg-grayscale' || filterMode === 'bw-contrast') {
+              if (lum >= bgThreshold && sat < 45) {
+                a = 0;
+              } else if (lum >= bgThreshold - 28 && sat < 40) {
+                const factor = (bgThreshold - lum) / 28;
+                a = Math.round(a * Math.max(0, Math.min(1, factor)));
+              }
+            }
+
+            if (filterMode === 'grayscale' || filterMode === 'remove-bg-grayscale') {
+              const gray = Math.round(lum);
+              r = gray; g = gray; b = gray;
+            }
+
+            if (filterMode === 'bw-contrast') {
+              const contrast = lum < bgThreshold - 25 ? Math.max(0, Math.round(lum * 0.45)) : Math.round(lum);
+              r = contrast; g = contrast; b = contrast;
+            }
+
+            data[i] = r; data[i + 1] = g; data[i + 2] = b; data[i + 3] = a;
+          }
+
+          ctx.putImageData(imgData, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.src = sourceDataUrl;
+      });
+    }
+
     function updateUI() {
       fileCountEl.textContent = `${pdfFiles.length}개 파일`;
       statFilesCount.textContent = pdfFiles.length;
+      const totalSize = pdfFiles.reduce((acc, cur) => acc + cur.size, 0);
+      statTotalSize.textContent = formatBytes(totalSize);
       statFilesBar.style.width = `${Math.min(pdfFiles.length * 20, 100)}%`;
 
       const selectedPagesCount = pageItems.filter(p => p.selected).length;
@@ -497,7 +843,10 @@
       
       fileListEl.innerHTML = pdfFiles.map((f, idx) => `
         <li class="p-2.5 rounded-xl neu-flat-sm flex justify-between items-center text-[#44475B]">
-          <span class="truncate font-bold flex-1 mr-2 text-[11px]" title="${f.name}">${f.name}</span>
+          <div class="truncate flex-1 mr-2 text-[11px]" title="${f.name}">
+            <p class="font-bold truncate">${f.name}</p>
+            <p class="text-[10px] text-[#8A90A6]">${formatBytes(f.size)}</p>
+          </div>
           <div class="flex items-center gap-1.5 shrink-0">
             <span class="text-[9px] neu-pressed-sm text-[#4F46E5] font-mono px-1.5 py-0.5 rounded">#${idx + 1}</span>
             <button onclick="removeFile('${f.id}')" class="text-rose-400 hover:text-rose-600 transition-colors p-1" title="파일 삭제">
@@ -525,22 +874,82 @@
       updateUI();
     };
 
-    // 썸네일 그리드 렌더링
+    let draggedCardIdx = null;
+
     function renderGrid() {
       pagesGrid.innerHTML = '';
 
       pageItems.forEach((item, index) => {
         const card = document.createElement('div');
-        card.className = `relative rounded-2xl p-3 flex flex-col items-center space-y-2.5 transition-all duration-150 ${
+        card.draggable = true;
+        card.className = `relative rounded-2xl p-3 flex flex-col items-center space-y-2 transition-all duration-150 cursor-default select-none ${
           item.selected ? 'neu-flat ring-2 ring-[#4F46E5]' : 'neu-pressed opacity-60'
         }`;
 
+        // 드래그 앤 드롭 리스너
+        card.addEventListener('dragstart', (e) => {
+          draggedCardIdx = index;
+          card.classList.add('opacity-40', 'scale-95');
+          e.dataTransfer.setData('text/plain', index);
+        });
+
+        card.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          card.classList.add('ring-4', 'ring-[#4F46E5]', 'scale-105');
+        });
+
+        card.addEventListener('dragleave', () => {
+          card.classList.remove('ring-4', 'ring-[#4F46E5]', 'scale-105');
+        });
+
+        card.addEventListener('drop', (e) => {
+          e.preventDefault();
+          card.classList.remove('ring-4', 'ring-[#4F46E5]', 'scale-105');
+          if (draggedCardIdx !== null && draggedCardIdx !== index) {
+            moveItem(draggedCardIdx, index);
+          }
+          draggedCardIdx = null;
+        });
+
+        card.addEventListener('dragend', () => {
+          card.classList.remove('opacity-40', 'scale-95', 'ring-4', 'ring-[#4F46E5]', 'scale-105');
+          draggedCardIdx = null;
+        });
+
+        // 카드 상단 드래그 핸들 바 + 확대 버튼
+        const dragHandle = document.createElement('div');
+        dragHandle.className = 'w-full flex items-center justify-between px-1 py-0.5 cursor-grab active:cursor-grabbing text-[#6C7289] hover:text-[#4F46E5] transition-colors';
+        dragHandle.title = '마우스로 카드를 끌어서 순서를 변경하세요';
+        dragHandle.innerHTML = `
+          <div class="flex items-center gap-1.5">
+            <span class="text-[12px] text-[#8A90A6]">⋮⋮</span>
+            <span class="text-[10px] font-black text-[#4F46E5] neu-pressed-sm px-1.5 py-0.5 rounded-md">#${index + 1}</span>
+          </div>
+          <button type="button" class="btn-zoom neu-btn px-2 py-0.5 rounded-lg text-[10px] font-bold text-[#4F46E5] flex items-center gap-1" title="페이지 크게 확대하여 글자/그림 편집하기">🔍 확대</button>
+        `;
+        dragHandle.querySelector('.btn-zoom').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openZoomModal(item.id);
+        });
+        card.appendChild(dragHandle);
+
         const canvasWrapper = document.createElement('div');
-        canvasWrapper.className = `relative w-full rounded-xl overflow-hidden neu-pressed bg-[#E0E5EC] ${stampDataUrl ? 'cursor-crosshair' : 'cursor-default'}`;
+        canvasWrapper.className = 'relative w-full rounded-xl overflow-hidden neu-pressed bg-[#E0E5EC] group cursor-zoom-in';
+        canvasWrapper.title = '클릭하여 페이지 크게 확대 및 글자/그림 편집하기';
         
         const canvas = document.createElement('canvas');
-        canvas.className = 'w-full h-auto block';
+        canvas.className = 'w-full h-auto block pointer-events-none';
         canvasWrapper.appendChild(canvas);
+
+        const zoomBadge = document.createElement('button');
+        zoomBadge.type = 'button';
+        zoomBadge.className = 'absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#2D3142]/80 hover:bg-[#4F46E5] text-white px-2 py-1 rounded-lg text-[10px] font-bold shadow-md';
+        zoomBadge.textContent = '🔍 크게 보기';
+        zoomBadge.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openZoomModal(item.id);
+        });
+        canvasWrapper.appendChild(zoomBadge);
 
         const stampOverlay = document.createElement('div');
         stampOverlay.className = 'absolute inset-0 pointer-events-none';
@@ -572,46 +981,50 @@
           }
         });
 
-        item.stamps.forEach((stamp, sIdx) => {
-          const stampImg = document.createElement('img');
-          stampImg.src = stampDataUrl;
-          stampImg.className = 'absolute pointer-events-auto cursor-pointer transition-transform hover:scale-110 drop-shadow-md';
-          stampImg.style.left = `${stamp.xRatio * 100}%`;
-          stampImg.style.top = `${stamp.yRatio * 100}%`;
-          stampImg.style.width = `${(stamp.widthMm / 210) * 100}%`;
-          stampImg.style.transform = 'translate(-50%, -50%)';
-          stampImg.title = '클릭하여 도장 삭제';
-          stampImg.onclick = (e) => { e.stopPropagation(); item.stamps.splice(sIdx, 1); renderGrid(); };
-          stampOverlay.appendChild(stampImg);
+        (item.images || []).forEach((imgMark) => {
+          const el = document.createElement('img');
+          el.src = imgMark.dataUrl;
+          el.className = 'absolute pointer-events-none';
+          el.style.left = `${imgMark.xRatio * 100}%`;
+          el.style.top = `${imgMark.yRatio * 100}%`;
+          el.style.width = `${(imgMark.widthMm / 210) * 100}%`;
+          el.style.transform = 'translate(-50%, -50%)';
+          stampOverlay.appendChild(el);
         });
 
-        canvasWrapper.addEventListener('click', (e) => {
-          if (!stampImageBytes) return;
-          const rect = canvas.getBoundingClientRect();
-          item.stamps.push({
-            xRatio: (e.clientX - rect.left) / rect.width,
-            yRatio: (e.clientY - rect.top) / rect.height,
-            widthMm: parseFloat(stampSizeInput.value)
-          });
-          renderGrid();
+        (item.texts || []).forEach((textMark) => {
+          const el = document.createElement('img');
+          el.src = textMark.dataUrl;
+          el.className = 'absolute pointer-events-none';
+          el.style.left = `${textMark.xRatio * 100}%`;
+          el.style.top = `${textMark.yRatio * 100}%`;
+          el.style.width = `${(textMark.widthMm / 210) * 100}%`;
+          el.style.transform = 'translate(-50%, -50%)';
+          stampOverlay.appendChild(el);
         });
 
-        // 카드 하단 컨트롤 바
+        canvasWrapper.addEventListener('click', () => {
+          openZoomModal(item.id);
+        });
+
         const footer = document.createElement('div');
         footer.className = 'w-full flex flex-wrap items-center justify-between gap-y-2 gap-x-1 text-xs pt-2 border-t border-[#C8CED6]/40';
         footer.innerHTML = `
           <label class="flex items-center gap-1.5 cursor-pointer select-none min-w-0">
             <input type="checkbox" ${item.selected ? 'checked' : ''} class="w-4 h-4 rounded accent-[#4F46E5] cursor-pointer shrink-0" />
-            <span class="font-extrabold text-[#2D3142] truncate max-w-[55px]" title="${item.fileName}">${item.fileName.substring(0, 5)}..</span>
+            <span class="font-extrabold text-[#2D3142] truncate max-w-[48px]" title="${item.fileName}">${item.fileName.substring(0, 4)}..</span>
             <span class="text-[9px] neu-pressed-sm text-[#4F46E5] font-black px-1.5 py-0.5 rounded shrink-0">p.${item.pageNumber}</span>
           </label>
-          <div class="flex items-center gap-1 shrink-0 ml-auto">
+          <div class="flex items-center gap-0.5 shrink-0 ml-auto">
             <button class="btn-crop neu-btn w-6 h-6 rounded-lg flex items-center justify-center text-[10px]" title="여백 자르기">✂️</button>
-            <button class="btn-rotate neu-btn w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[11px]" title="90° 회전">↻</button>
+            <button class="btn-rotate-left neu-btn w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[11px]" title="90° 왼쪽(반시계) 회전">↺</button>
+            <button class="btn-rotate neu-btn w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[11px]" title="90° 오른쪽(시계) 회전">↻</button>
             <button class="btn-move-left neu-btn w-6 h-6 rounded-lg flex items-center justify-center text-[10px]" ${index === 0 ? 'disabled' : ''} title="앞으로">◀</button>
             <button class="btn-move-right neu-btn w-6 h-6 rounded-lg flex items-center justify-center text-[10px]" ${index === pageItems.length - 1 ? 'disabled' : ''} title="뒤로">▶</button>
           </div>
         `;
+
+        footer.addEventListener('click', (e) => e.stopPropagation());
 
         footer.querySelector('input').addEventListener('change', (e) => { 
           item.selected = e.target.checked; 
@@ -619,6 +1032,7 @@
           updateUI();
         });
         footer.querySelector('.btn-crop').addEventListener('click', () => { item.cropPercent = (item.cropPercent + 5) % 25; renderGrid(); });
+        footer.querySelector('.btn-rotate-left').addEventListener('click', () => { item.rotation = (item.rotation + 270) % 360; renderGrid(); });
         footer.querySelector('.btn-rotate').addEventListener('click', () => { item.rotation = (item.rotation + 90) % 360; renderGrid(); });
         footer.querySelector('.btn-move-left').addEventListener('click', () => moveItem(index, index - 1));
         footer.querySelector('.btn-move-right').addEventListener('click', () => moveItem(index, index + 1));
@@ -640,7 +1054,6 @@
     document.getElementById('btn-deselect-all').addEventListener('click', () => { pageItems.forEach(p => p.selected = false); updateUI(); });
     document.getElementById('btn-clear-all').addEventListener('click', () => { if (confirm('모두 삭제하시겠습니까?')) { pdfFiles = []; pageItems = []; updateUI(); }});
 
-    // 최종 PDF 생성 및 다운로드
     btnMergeAll.addEventListener('click', async () => {
       const selectedItems = pageItems.filter(p => p.selected);
       if (selectedItems.length === 0) return;
@@ -651,8 +1064,11 @@
       try {
         const mergedPdf = await PDFLib.PDFDocument.create();
         const helveticaFont = await mergedPdf.embedFont(PDFLib.StandardFonts.HelveticaBold);
-        let embeddedStamp = null;
-        if (stampImageBytes) embeddedStamp = await mergedPdf.embedPng(stampImageBytes);
+
+        const isCompress = toggleCompress.classList.contains('active');
+        const compressMode = document.querySelector('input[name="compress-mode"]:checked')?.value || 'standard';
+        const targetScale = compressMode === 'maximum' ? 1.0 : 1.25;
+        const targetQuality = compressMode === 'maximum' ? 0.55 : 0.72;
 
         const isPageNum = togglePageNumber.classList.contains('active');
         const selectedFormat = document.querySelector('input[name="page-num-format"]:checked')?.value || 'fraction';
@@ -661,72 +1077,120 @@
         const wmStr = document.getElementById('watermark-text').value.trim() || 'CONFIDENTIAL';
         const totalSelectedPages = selectedItems.length;
 
-        const loadedDocs = new Map();
+        if (isCompress) {
+          for (let i = 0; i < totalSelectedPages; i++) {
+            const item = selectedItems[i];
+            btnMergeFront.textContent = `에듀파인 다이어트 중 (${i + 1}/${totalSelectedPages})...`;
 
-        for (let i = 0; i < selectedItems.length; i++) {
-          const item = selectedItems[i];
-          if (!loadedDocs.has(item.fileId)) {
-            const rawFile = pdfFiles.find(f => f.id === item.fileId);
-            loadedDocs.set(item.fileId, await PDFLib.PDFDocument.load(rawFile.arrayBuffer));
-          }
-          const srcDoc = loadedDocs.get(item.fileId);
-          const [copiedPage] = await mergedPdf.copyPages(srcDoc, [item.pageIndex]);
-          const addedPage = mergedPdf.addPage(copiedPage);
+            const viewport = item.pdfjsPage.getViewport({ scale: targetScale, rotation: item.rotation });
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            const ctx = canvas.getContext('2d');
+            await item.pdfjsPage.render({ canvasContext: ctx, viewport }).promise;
 
-          if (item.rotation !== 0) {
-            addedPage.setRotation(PDFLib.degrees(addedPage.getRotation().angle + item.rotation));
-          }
+            const jpegDataUrl = canvas.toDataURL('image/jpeg', targetQuality);
+            const base64Data = jpegDataUrl.split(',')[1];
+            const binaryString = atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let b = 0; b < binaryString.length; b++) bytes[b] = binaryString.charCodeAt(b);
 
-          let { width, height } = addedPage.getSize();
+            const embeddedJpg = await mergedPdf.embedJpg(bytes);
+            const stdW = 595.28;
+            const stdH = (viewport.height / viewport.width) * stdW;
+            const addedPage = mergedPdf.addPage([stdW, stdH]);
 
-          // 1. 트리밍(자르기) 적용
-          if (item.cropPercent > 0) {
-            const trimW = width * (item.cropPercent / 100);
-            const trimH = height * (item.cropPercent / 100);
-            addedPage.setCropBox(trimW, trimH, width - trimW * 2, height - trimH * 2);
-          }
-
-          // 2. 워터마크 삽입
-          if (isWm) {
-            const wmSize = 48;
-            const textWidth = helveticaFont.widthOfTextAtSize(wmStr, wmSize);
-            addedPage.drawText(wmStr, { x: (width - textWidth) / 2, y: height / 2, size: wmSize, font: helveticaFont, color: PDFLib.rgb(0.31, 0.27, 0.9), opacity: 0.2, rotate: PDFLib.degrees(45) });
-          }
-
-          // 3. 서식별 쪽번호 자동 인쇄
-          if (isPageNum) {
-            let numText = '';
-            const cur = i + 1;
-            if (selectedFormat === 'simple') {
-              numText = `${cur}`;
-            } else if (selectedFormat === 'hyphen') {
-              numText = `- ${cur} -`;
-            } else if (selectedFormat === 'fraction') {
-              numText = `${cur}/${totalSelectedPages}`;
-            } else if (selectedFormat === 'full-hyphen') {
-              numText = `- ${cur} / ${totalSelectedPages} -`;
+            if (item.cropPercent > 0) {
+              const trimW = stdW * (item.cropPercent / 100);
+              const trimH = stdH * (item.cropPercent / 100);
+              addedPage.setCropBox(trimW, trimH, stdW - trimW * 2, stdH - trimH * 2);
             }
 
-            const numWidth = helveticaFont.widthOfTextAtSize(numText, 10);
-            addedPage.drawText(numText, {
-              x: (width - numWidth) / 2,
-              y: 20,
-              size: 10,
-              font: helveticaFont,
-              color: PDFLib.rgb(0.3, 0.35, 0.45)
-            });
-          }
+            addedPage.drawImage(embeddedJpg, { x: 0, y: 0, width: stdW, height: stdH });
 
-          // 4. 스탬프 날인
-          if (item.stamps.length > 0 && embeddedStamp) {
-            for (const stamp of item.stamps) {
-              const stampWidthPt = stamp.widthMm * 2.83465;
-              const stampHeightPt = (stampWidthPt / embeddedStamp.width) * embeddedStamp.height;
-              addedPage.drawImage(embeddedStamp, {
-                x: (stamp.xRatio * width) - (stampWidthPt / 2),
-                y: height - (stamp.yRatio * height) - (stampHeightPt / 2),
-                width: stampWidthPt, height: stampHeightPt
-              });
+            if (isWm) {
+              const wmSize = 48;
+              const textWidth = helveticaFont.widthOfTextAtSize(wmStr, wmSize);
+              addedPage.drawText(wmStr, { x: (stdW - textWidth) / 2, y: stdH / 2, size: wmSize, font: helveticaFont, color: PDFLib.rgb(0.31, 0.27, 0.9), opacity: 0.2, rotate: PDFLib.degrees(45) });
+            }
+
+            if (isPageNum) {
+              let numText = '';
+              const cur = i + 1;
+              if (selectedFormat === 'simple') numText = `${cur}`;
+              else if (selectedFormat === 'hyphen') numText = `- ${cur} -`;
+              else if (selectedFormat === 'fraction') numText = `${cur}/${totalSelectedPages}`;
+              else if (selectedFormat === 'full-hyphen') numText = `- ${cur} / ${totalSelectedPages} -`;
+
+              const numWidth = helveticaFont.widthOfTextAtSize(numText, 10);
+              addedPage.drawText(numText, { x: (stdW - numWidth) / 2, y: 20, size: 10, font: helveticaFont, color: PDFLib.rgb(0.3, 0.35, 0.45) });
+            }
+
+            if (item.images && item.images.length > 0) {
+              for (const imgMark of item.images) {
+                const embeddedUserImg = await mergedPdf.embedPng(dataUrlToUint8Array(imgMark.dataUrl));
+                drawCenteredImageOnPdfPage(addedPage, embeddedUserImg, imgMark.xRatio, imgMark.yRatio, imgMark.widthMm);
+              }
+            }
+
+            if (item.texts && item.texts.length > 0) {
+              for (const textMark of item.texts) {
+                const embeddedTxtImg = await mergedPdf.embedPng(dataUrlToUint8Array(textMark.dataUrl));
+                drawCenteredImageOnPdfPage(addedPage, embeddedTxtImg, textMark.xRatio, textMark.yRatio, textMark.widthMm);
+              }
+            }
+          }
+        } else {
+          const loadedDocs = new Map();
+          for (let i = 0; i < selectedItems.length; i++) {
+            const item = selectedItems[i];
+            if (!loadedDocs.has(item.fileId)) {
+              const rawFile = pdfFiles.find(f => f.id === item.fileId);
+              loadedDocs.set(item.fileId, await PDFLib.PDFDocument.load(rawFile.arrayBuffer));
+            }
+            const srcDoc = loadedDocs.get(item.fileId);
+            const [copiedPage] = await mergedPdf.copyPages(srcDoc, [item.pageIndex]);
+            const addedPage = mergedPdf.addPage(copiedPage);
+
+            if (item.rotation !== 0) addedPage.setRotation(PDFLib.degrees(addedPage.getRotation().angle + item.rotation));
+
+            let { width, height } = addedPage.getSize();
+            if (item.cropPercent > 0) {
+              const trimW = width * (item.cropPercent / 100);
+              const trimH = height * (item.cropPercent / 100);
+              addedPage.setCropBox(trimW, trimH, width - trimW * 2, height - trimH * 2);
+            }
+
+            if (isWm) {
+              const wmSize = 48;
+              const textWidth = helveticaFont.widthOfTextAtSize(wmStr, wmSize);
+              addedPage.drawText(wmStr, { x: (width - textWidth) / 2, y: height / 2, size: wmSize, font: helveticaFont, color: PDFLib.rgb(0.31, 0.27, 0.9), opacity: 0.2, rotate: PDFLib.degrees(45) });
+            }
+
+            if (isPageNum) {
+              let numText = '';
+              const cur = i + 1;
+              if (selectedFormat === 'simple') numText = `${cur}`;
+              else if (selectedFormat === 'hyphen') numText = `- ${cur} -`;
+              else if (selectedFormat === 'fraction') numText = `${cur}/${totalSelectedPages}`;
+              else if (selectedFormat === 'full-hyphen') numText = `- ${cur} / ${totalSelectedPages} -`;
+
+              const numWidth = helveticaFont.widthOfTextAtSize(numText, 10);
+              addedPage.drawText(numText, { x: (width - numWidth) / 2, y: 20, size: 10, font: helveticaFont, color: PDFLib.rgb(0.3, 0.35, 0.45) });
+            }
+
+            if (item.images && item.images.length > 0) {
+              for (const imgMark of item.images) {
+                const embeddedUserImg = await mergedPdf.embedPng(dataUrlToUint8Array(imgMark.dataUrl));
+                drawCenteredImageOnPdfPage(addedPage, embeddedUserImg, imgMark.xRatio, imgMark.yRatio, imgMark.widthMm);
+              }
+            }
+
+            if (item.texts && item.texts.length > 0) {
+              for (const textMark of item.texts) {
+                const embeddedTxtImg = await mergedPdf.embedPng(dataUrlToUint8Array(textMark.dataUrl));
+                drawCenteredImageOnPdfPage(addedPage, embeddedTxtImg, textMark.xRatio, textMark.yRatio, textMark.widthMm);
+              }
             }
           }
         }
@@ -734,17 +1198,1104 @@
         const mergedPdfBytes = await mergedPdf.save();
         const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
         const downloadUrl = URL.createObjectURL(blob);
+        const fileName = `PDF_공작소_${isCompress ? '에듀파인최적화_' : ''}${new Date().toISOString().slice(0, 10)}.pdf`;
+        
         const a = document.createElement('a');
         a.href = downloadUrl;
-        a.download = `PDF_공작소_${new Date().toISOString().slice(0, 10)}.pdf`;
+        a.download = fileName;
         a.click();
-        URL.revokeObjectURL(downloadUrl);
+
+        // 결과 모달 표시
+        const origBytes = pdfFiles.reduce((acc, cur) => acc + cur.size, 0) || mergedPdfBytes.byteLength * 2;
+        const newBytes = mergedPdfBytes.byteLength;
+        const savedPercent = Math.max(0, Math.round(((origBytes - newBytes) / origBytes) * 100));
+
+        showResultModal(origBytes, newBytes, savedPercent, downloadUrl, fileName);
 
       } catch (err) {
         alert('PDF 처리 중 오류가 발생했습니다: ' + err.message);
       } finally {
         btnMergeAll.disabled = false;
         btnMergeFront.textContent = '선택 페이지 새 PDF로 저장';
+      }
+    });
+
+    function showResultModal(orig, comp, pct, url, name) {
+      document.getElementById('modal-orig-size').textContent = formatBytes(orig);
+      document.getElementById('modal-new-size').textContent = formatBytes(comp);
+      document.getElementById('modal-pct').textContent = pct > 0 ? `-${pct}% 절감` : '최적화 완료';
+      
+      const badge = document.getElementById('modal-badge');
+      if (comp <= 10 * 1024 * 1024) {
+        badge.innerHTML = '✅ 에듀파인 10MB 기준 완벽 통과! 안심하고 첨부하세요.';
+        badge.className = 'p-3 rounded-2xl text-xs font-bold neu-pressed-sm text-emerald-700 bg-emerald-50/50';
+      } else if (comp <= 20 * 1024 * 1024) {
+        badge.innerHTML = '⚠️ 10MB는 초과하지만 20MB 한도 내 첨부 가능합니다.';
+        badge.className = 'p-3 rounded-2xl text-xs font-bold neu-pressed-sm text-amber-700 bg-amber-50/50';
+      } else {
+        badge.innerHTML = '⚠️ 20MB를 초과했습니다. 초강력 다이어트로 재시도해보세요.';
+        badge.className = 'p-3 rounded-2xl text-xs font-bold neu-pressed-sm text-rose-700 bg-rose-50/50';
+      }
+
+      const reDownload = document.getElementById('modal-redownload');
+      reDownload.href = url;
+      reDownload.download = name;
+
+      document.getElementById('result-modal').classList.remove('hidden');
+    }
+
+    document.getElementById('modal-close').addEventListener('click', () => {
+      document.getElementById('result-modal').classList.add('hidden');
+    });
+    document.getElementById('modal-btn-close').addEventListener('click', () => {
+      document.getElementById('result-modal').classList.add('hidden');
+    });
+
+    // ==========================================
+    // 페이지 확대 보기 & 고급 편집(글자/그림/양방향 회전/실행취소·다시실행) 모달 로직
+    // ==========================================
+    let zoomedPageId = null;
+    let zoomModalScale = 1.35;
+    let zoomRenderTask = null;
+    let zoomActiveTool = 'text';
+    let zoomTextBold = true;
+    let zoomTextItalic = false;
+    let zoomTextColor = '#1E293B';
+    let zoomTextPreview = { dataUrl: '', widthMm: 0 };
+    let zoomRawImgUrl = null;
+    let zoomProcessedImgUrl = null;
+    let zoomImgFilterMode = 'original';
+    let zoomImgThreshold = 225;
+    let zoomImgWidthMm = 55;
+    let zoomImagePlacementArmed = false;
+    let zoomSelectedImageId = null;
+    let zoomDraggingOverlay = null;
+    let zoomResizingImage = null;
+    let zoomJustInteracted = false;
+    let zoomDragStartSnapshot = null;
+    let zoomDragDidModify = false;
+
+    // 범위 글자 인식 상태
+    let zoomOcrMode = 'smart';
+    let zoomOcrBox = null;
+    let zoomOcrDraft = null;
+    let zoomOcrLoading = false;
+    let zoomOcrReqId = 0;
+    let sharedOcrWorkerPromise = null;
+    let activeOcrLogger = null;
+
+    const zoomModal = document.getElementById('zoom-modal');
+    const zoomModalPanel = document.getElementById('zoom-modal-panel');
+    const zoomCanvasContainer = document.getElementById('zoom-canvas-container');
+    const zoomCanvas = document.getElementById('zoom-canvas');
+    const zoomHoverGhost = document.getElementById('zoom-hover-ghost');
+    const zoomStampOverlay = document.getElementById('zoom-stamp-overlay');
+
+    const zoomUndoBtn = document.getElementById('zoom-undo-btn');
+    const zoomRedoBtn = document.getElementById('zoom-redo-btn');
+
+    const zoomTextInputEl = document.getElementById('zoom-text-input');
+    const zoomTextFontEl = document.getElementById('zoom-text-font');
+    const zoomTextSizeEl = document.getElementById('zoom-text-size');
+    const zoomTextSizeValEl = document.getElementById('zoom-text-size-val');
+    const zoomTextBoldBtn = document.getElementById('zoom-text-bold');
+    const zoomTextItalicBtn = document.getElementById('zoom-text-italic');
+    const zoomTextColorEl = document.getElementById('zoom-text-color');
+
+    const zoomImgInputEl = document.getElementById('zoom-image-input');
+    const zoomImgControlsEl = document.getElementById('zoom-image-controls');
+    const zoomImgPreviewEl = document.getElementById('zoom-image-preview');
+    const zoomImgEmptyHintEl = document.getElementById('zoom-image-empty-hint');
+    const zoomImgThresholdWrap = document.getElementById('zoom-image-threshold-wrap');
+    const zoomImgThresholdEl = document.getElementById('zoom-image-threshold');
+    const zoomImgWidthEl = document.getElementById('zoom-image-width');
+    const zoomImgWidthValEl = document.getElementById('zoom-image-width-val');
+    const zoomImgPlaceHintEl = document.getElementById('zoom-image-place-hint');
+    const zoomImgRearmBtn = document.getElementById('zoom-image-rearm-btn');
+
+    const zoomOcrMarquee = document.getElementById('zoom-ocr-marquee');
+    const zoomOcrMarqueeBadge = document.getElementById('zoom-ocr-marquee-badge');
+    const zoomOcrTopActions = document.getElementById('zoom-ocr-top-actions');
+    const zoomOcrResultPanel = document.getElementById('zoom-ocr-result-panel');
+    const zoomOcrPreviewWrap = document.getElementById('zoom-ocr-preview-wrap');
+    const zoomOcrPreviewImg = document.getElementById('zoom-ocr-preview-img');
+    const zoomOcrEngineBadge = document.getElementById('zoom-ocr-engine-badge');
+    const zoomOcrLoadingBox = document.getElementById('zoom-ocr-loading-box');
+    const zoomOcrProgressText = document.getElementById('zoom-ocr-progress-text');
+    const zoomOcrTextarea = document.getElementById('zoom-ocr-textarea');
+    const zoomOcrErrorMsg = document.getElementById('zoom-ocr-error-msg');
+    const zoomOcrCopyBtn = document.getElementById('zoom-ocr-copy-btn');
+    const zoomOcrRetryBtn = document.getElementById('zoom-ocr-retry-btn');
+
+    async function getSharedOcrWorker(onProgress) {
+      activeOcrLogger = onProgress || null;
+      if (typeof Tesseract === 'undefined') {
+        throw new Error('OCR 엔진(Tesseract.js)이 로드되지 않았습니다.');
+      }
+      if (!sharedOcrWorkerPromise) {
+        sharedOcrWorkerPromise = Tesseract.createWorker('kor+eng', 1, {
+          logger: (m) => { if (activeOcrLogger) activeOcrLogger(m); }
+        }).catch((err) => {
+          sharedOcrWorkerPromise = null;
+          throw err;
+        });
+      }
+      return sharedOcrWorkerPromise;
+    }
+
+    async function extractPdfRegionText(pdfjsPage, rotation, box) {
+      const viewport = pdfjsPage.getViewport({ scale: 1.0, rotation });
+      const textContent = await pdfjsPage.getTextContent();
+      const items = (textContent && textContent.items) || [];
+
+      const boxL = box.x1 * viewport.width;
+      const boxR = box.x2 * viewport.width;
+      const boxT = box.y1 * viewport.height;
+      const boxB = box.y2 * viewport.height;
+
+      const frags = [];
+      for (const tx of items) {
+        if (!tx || typeof tx.str !== 'string' || !tx.str) continue;
+        if (!pdfjsLib || !pdfjsLib.Util || !pdfjsLib.Util.transform) continue;
+        const m = pdfjsLib.Util.transform(viewport.transform, tx.transform);
+        const x = m[4];
+        const baselineY = m[5];
+        const vh = Math.max(Math.hypot(m[2], m[3]), tx.height || 0, 8);
+        const vw = Math.max(tx.width || 0, 2);
+
+        const itemL = x;
+        const itemR = x + vw;
+        const itemT = baselineY - vh * 0.85;
+        const itemB = baselineY + vh * 0.2;
+        const cy = baselineY - vh * 0.35;
+
+        const horizOverlap = Math.min(itemR, boxR) - Math.max(itemL, boxL);
+        const vertInside = cy >= boxT - vh * 0.25 && cy <= boxB + vh * 0.25;
+        const vertOverlap = Math.min(itemB, boxB) - Math.max(itemT, boxT);
+        if (horizOverlap <= 0 || (!vertInside && vertOverlap < vh * 0.35)) continue;
+
+        let textStr = tx.str;
+        const fragX = Math.max(itemL, boxL);
+        const fragEndX = Math.min(itemR, boxR);
+        if (textStr.length > 1 && vw > 4 && (itemL < boxL - 2 || itemR > boxR + 2)) {
+          const startRatio = Math.max(0, Math.min(1, (boxL - itemL) / vw));
+          const endRatio = Math.max(0, Math.min(1, (boxR - itemL) / vw));
+          textStr = textStr.slice(Math.floor(startRatio * textStr.length), Math.ceil(endRatio * textStr.length));
+        }
+        if (!textStr.trim()) continue;
+        frags.push({ str: textStr, x: fragX, endX: fragEndX, cy, vh });
+      }
+
+      if (frags.length === 0) return '';
+      frags.sort((a, b) => a.cy - b.cy || a.x - b.x);
+      const lines = [];
+      for (const f of frags) {
+        const matched = lines.find((ln) => Math.abs(ln.avgCy - f.cy) <= Math.max(ln.avgVh, f.vh) * 0.55);
+        if (matched) {
+          matched.parts.push(f);
+          const n = matched.parts.length;
+          matched.avgCy = (matched.avgCy * (n - 1) + f.cy) / n;
+          matched.avgVh = Math.max(matched.avgVh, f.vh);
+        } else {
+          lines.push({ avgCy: f.cy, avgVh: f.vh, parts: [f] });
+        }
+      }
+      lines.sort((a, b) => a.avgCy - b.avgCy);
+      return lines.map((ln) => {
+        ln.parts.sort((a, b) => a.x - b.x);
+        let out = '';
+        let prevEnd = -Infinity;
+        for (const p of ln.parts) {
+          if (out && !out.endsWith(' ') && !p.str.startsWith(' ') && p.x - prevEnd > p.vh * 0.22) out += ' ';
+          out += p.str;
+          prevEnd = Math.max(prevEnd, p.endX);
+        }
+        return out.trim();
+      }).filter(Boolean).join('\n');
+    }
+
+    async function captureRegionImageForOcr(pdfjsPage, rotation, box) {
+      const baseVp = pdfjsPage.getViewport({ scale: 1.0, rotation });
+      const renderScale = Math.min(3.5, Math.max(2.2, 2600 / Math.max(baseVp.width, baseVp.height)));
+      const vp = pdfjsPage.getViewport({ scale: renderScale, rotation });
+      const fullCanvas = document.createElement('canvas');
+      fullCanvas.width = Math.round(vp.width);
+      fullCanvas.height = Math.round(vp.height);
+      const fullCtx = fullCanvas.getContext('2d');
+      fullCtx.fillStyle = '#FFFFFF';
+      fullCtx.fillRect(0, 0, fullCanvas.width, fullCanvas.height);
+      await pdfjsPage.render({ canvasContext: fullCtx, viewport: vp }).promise;
+
+      const sx = Math.max(0, Math.floor(box.x1 * fullCanvas.width));
+      const sy = Math.max(0, Math.floor(box.y1 * fullCanvas.height));
+      const sw = Math.max(10, Math.min(fullCanvas.width - sx, Math.ceil((box.x2 - box.x1) * fullCanvas.width)));
+      const sh = Math.max(10, Math.min(fullCanvas.height - sy, Math.ceil((box.y2 - box.y1) * fullCanvas.height)));
+
+      const prevCanvas = document.createElement('canvas');
+      prevCanvas.width = sw;
+      prevCanvas.height = sh;
+      prevCanvas.getContext('2d').drawImage(fullCanvas, sx, sy, sw, sh, 0, 0, sw, sh);
+      const previewDataUrl = prevCanvas.toDataURL('image/png');
+
+      const upscale = sw < 360 || sh < 100 ? 2 : 1;
+      const pad = 20;
+      const ocrCanvas = document.createElement('canvas');
+      ocrCanvas.width = sw * upscale + pad * 2;
+      ocrCanvas.height = sh * upscale + pad * 2;
+      const ocrCtx = ocrCanvas.getContext('2d');
+      ocrCtx.fillStyle = '#FFFFFF';
+      ocrCtx.fillRect(0, 0, ocrCanvas.width, ocrCanvas.height);
+      ocrCtx.imageSmoothingEnabled = true;
+      ocrCtx.imageSmoothingQuality = 'high';
+      ocrCtx.drawImage(fullCanvas, sx, sy, sw, sh, pad, pad, sw * upscale, sh * upscale);
+
+      return { ocrDataUrl: ocrCanvas.toDataURL('image/png'), previewDataUrl };
+    }
+
+    async function copyTextToClipboard(text) {
+      if (!text) return false;
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (e) {}
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      } catch (e) { return false; }
+    }
+
+    function resetZoomOcrState() {
+      zoomOcrReqId += 1;
+      zoomOcrBox = null;
+      zoomOcrDraft = null;
+      zoomOcrLoading = false;
+      zoomOcrMarquee.classList.add('hidden');
+      zoomOcrTopActions.classList.add('hidden');
+      zoomOcrResultPanel.classList.add('hidden');
+      zoomOcrPreviewWrap.classList.add('hidden');
+      zoomOcrTextarea.value = '';
+      zoomOcrErrorMsg.classList.add('hidden');
+      zoomOcrRetryBtn.classList.add('hidden');
+      zoomOcrCopyBtn.textContent = '📋 글자 복사하기';
+    }
+
+    function updateOcrMarqueeUI() {
+      const box = zoomOcrDraft
+        ? {
+            x1: Math.min(zoomOcrDraft.startX, zoomOcrDraft.curX),
+            y1: Math.min(zoomOcrDraft.startY, zoomOcrDraft.curY),
+            x2: Math.max(zoomOcrDraft.startX, zoomOcrDraft.curX),
+            y2: Math.max(zoomOcrDraft.startY, zoomOcrDraft.curY)
+          }
+        : zoomOcrBox;
+
+      if (zoomActiveTool === 'ocr' && box) {
+        zoomOcrMarquee.style.left = `${box.x1 * 100}%`;
+        zoomOcrMarquee.style.top = `${box.y1 * 100}%`;
+        zoomOcrMarquee.style.width = `${(box.x2 - box.x1) * 100}%`;
+        zoomOcrMarquee.style.height = `${(box.y2 - box.y1) * 100}%`;
+        zoomOcrMarqueeBadge.textContent = zoomOcrDraft ? '영역 지정 중...' : (zoomOcrLoading ? '글자 인식 중...' : '인식된 영역');
+        zoomOcrMarquee.classList.remove('hidden');
+      } else {
+        zoomOcrMarquee.classList.add('hidden');
+      }
+    }
+
+    async function runZoomOcr(box, forceImageOcr) {
+      const item = pageItems.find(p => p.id === zoomedPageId);
+      if (!item) return;
+      const reqId = ++zoomOcrReqId;
+      zoomOcrLoading = true;
+      zoomOcrTopActions.classList.remove('hidden');
+      zoomOcrResultPanel.classList.remove('hidden');
+      zoomOcrLoadingBox.classList.remove('hidden');
+      zoomOcrTextarea.classList.add('hidden');
+      zoomOcrErrorMsg.classList.add('hidden');
+      zoomOcrRetryBtn.classList.add('hidden');
+      zoomOcrCopyBtn.disabled = true;
+      zoomOcrCopyBtn.textContent = '📋 글자 복사하기';
+      zoomOcrEngineBadge.textContent = '인식 중...';
+      zoomOcrEngineBadge.className = 'inline-block px-2 py-0.5 rounded-lg bg-indigo-50 text-[#4F46E5] text-[10px] font-bold';
+      zoomOcrProgressText.textContent = '선택 영역 이미지를 캡처하는 중...';
+      updateOcrMarqueeUI();
+
+      try {
+        const { ocrDataUrl, previewDataUrl } = await captureRegionImageForOcr(item.pdfjsPage, item.rotation, box);
+        if (zoomOcrReqId !== reqId) return;
+        zoomOcrPreviewImg.src = previewDataUrl;
+        zoomOcrPreviewWrap.classList.remove('hidden');
+
+        if (!forceImageOcr && zoomOcrMode === 'smart') {
+          zoomOcrProgressText.textContent = '문서 내 텍스트 레이어 확인 중...';
+          const extracted = await extractPdfRegionText(item.pdfjsPage, item.rotation, box);
+          if (zoomOcrReqId !== reqId) return;
+          if (extracted.trim().length > 0) {
+            zoomOcrLoading = false;
+            zoomOcrLoadingBox.classList.add('hidden');
+            zoomOcrTextarea.classList.remove('hidden');
+            zoomOcrTextarea.value = extracted;
+            zoomOcrCopyBtn.disabled = false;
+            zoomOcrRetryBtn.classList.remove('hidden');
+            zoomOcrEngineBadge.textContent = '⚡ PDF 텍스트 추출';
+            zoomOcrEngineBadge.className = 'inline-block px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 text-[10px] font-bold';
+            updateOcrMarqueeUI();
+            return;
+          }
+        }
+
+        zoomOcrProgressText.textContent = '한국어·영어 로컬 OCR 엔진 준비 중...';
+        const worker = await getSharedOcrWorker((m) => {
+          if (zoomOcrReqId !== reqId) return;
+          if (m.status === 'recognizing text') {
+            zoomOcrProgressText.textContent = `글자 인식 중... ${Math.round((m.progress || 0) * 100)}%`;
+          } else if (m.status === 'loading language traineddata') {
+            zoomOcrProgressText.textContent = `한국어·영어 인식 데이터 로드 중... ${Math.round((m.progress || 0) * 100)}%`;
+          } else if (m.status) {
+            zoomOcrProgressText.textContent = `OCR 처리 중 (${m.status})...`;
+          }
+        });
+        if (zoomOcrReqId !== reqId) return;
+
+        const result = await worker.recognize(ocrDataUrl);
+        if (zoomOcrReqId !== reqId) return;
+
+        const recognized = (result && result.data && result.data.text ? result.data.text : '').trim();
+        zoomOcrLoading = false;
+        zoomOcrLoadingBox.classList.add('hidden');
+        zoomOcrTextarea.classList.remove('hidden');
+        zoomOcrTextarea.value = recognized;
+        zoomOcrCopyBtn.disabled = !recognized;
+        zoomOcrRetryBtn.classList.remove('hidden');
+        zoomOcrEngineBadge.textContent = '🔍 이미지 OCR (한·영)';
+        zoomOcrEngineBadge.className = 'inline-block px-2 py-0.5 rounded-lg bg-indigo-50 text-[#4F46E5] text-[10px] font-bold';
+        if (!recognized) {
+          zoomOcrErrorMsg.textContent = '선택된 영역에서 글자를 찾지 못했습니다. 영역을 조금 더 넓게 드래그해 보세요.';
+          zoomOcrErrorMsg.classList.remove('hidden');
+        }
+        updateOcrMarqueeUI();
+      } catch (err) {
+        if (zoomOcrReqId !== reqId) return;
+        zoomOcrLoading = false;
+        zoomOcrLoadingBox.classList.add('hidden');
+        zoomOcrTextarea.classList.remove('hidden');
+        zoomOcrCopyBtn.disabled = !zoomOcrTextarea.value.trim();
+        zoomOcrErrorMsg.textContent = (err && err.message) || '글자 인식 중 오류가 발생했습니다.';
+        zoomOcrErrorMsg.classList.remove('hidden');
+        updateOcrMarqueeUI();
+      }
+    }
+
+    function clonePageSnapshot(item) {
+      return {
+        rotation: item.rotation,
+        texts: (item.texts || []).map(t => ({ ...t })),
+        images: (item.images || []).map(im => ({ ...im }))
+      };
+    }
+
+    function pushZoomHistory(pageId, snapshot) {
+      if (!historyByPage[pageId]) historyByPage[pageId] = { past: [], future: [] };
+      const h = historyByPage[pageId];
+      h.past.push(snapshot);
+      if (h.past.length > 50) h.past.shift();
+      h.future = [];
+    }
+
+    function undoZoomPage() {
+      const item = pageItems.find(p => p.id === zoomedPageId);
+      if (!item) return;
+      const h = historyByPage[item.id];
+      if (!h || h.past.length === 0) return;
+      const prev = h.past.pop();
+      h.future.unshift(clonePageSnapshot(item));
+      item.rotation = prev.rotation;
+      item.texts = prev.texts;
+      item.images = prev.images;
+      renderZoomModal();
+    }
+
+    function redoZoomPage() {
+      const item = pageItems.find(p => p.id === zoomedPageId);
+      if (!item) return;
+      const h = historyByPage[item.id];
+      if (!h || h.future.length === 0) return;
+      const next = h.future.shift();
+      h.past.push(clonePageSnapshot(item));
+      item.rotation = next.rotation;
+      item.texts = next.texts;
+      item.images = next.images;
+      renderZoomModal();
+    }
+
+    function refreshZoomTextPreview() {
+      const txt = zoomTextInputEl.value;
+      if (!txt.trim()) {
+        zoomTextPreview = { dataUrl: '', widthMm: 0 };
+        return;
+      }
+      zoomTextPreview = renderTextToPng({
+        text: txt,
+        fontFamily: zoomTextFontEl.value,
+        fontSizePt: parseFloat(zoomTextSizeEl.value),
+        bold: zoomTextBold,
+        italic: zoomTextItalic,
+        color: zoomTextColor
+      });
+    }
+
+    async function refreshZoomProcessedImage() {
+      if (!zoomRawImgUrl) {
+        zoomProcessedImgUrl = null;
+        zoomImgControlsEl.classList.add('hidden');
+        zoomImgEmptyHintEl.classList.remove('hidden');
+        return;
+      }
+      zoomProcessedImgUrl = await processImageWithFilter(zoomRawImgUrl, zoomImgFilterMode, zoomImgThreshold);
+      zoomImgPreviewEl.src = zoomProcessedImgUrl;
+      zoomImgControlsEl.classList.remove('hidden');
+      zoomImgEmptyHintEl.classList.add('hidden');
+      const needsThreshold = zoomImgFilterMode === 'remove-bg' || zoomImgFilterMode === 'remove-bg-grayscale' || zoomImgFilterMode === 'bw-contrast';
+      zoomImgThresholdWrap.classList.toggle('hidden', !needsThreshold);
+    }
+
+    function openZoomModal(pageId) {
+      zoomedPageId = pageId;
+      zoomActiveTool = 'text';
+      zoomSelectedImageId = null;
+      resetZoomOcrState();
+      zoomModal.classList.remove('hidden');
+      renderZoomModal();
+    }
+
+    function closeZoomModal() {
+      zoomedPageId = null;
+      zoomDraggingOverlay = null;
+      zoomResizingImage = null;
+      resetZoomOcrState();
+      zoomModal.classList.add('hidden');
+      zoomHoverGhost.classList.add('hidden');
+      renderGrid();
+    }
+
+    function updateZoomToolbarUI(item) {
+      const hist = historyByPage[item.id] || { past: [], future: [] };
+      zoomUndoBtn.disabled = hist.past.length === 0;
+      zoomRedoBtn.disabled = hist.future.length === 0;
+
+      document.querySelectorAll('.zoom-tool-tab').forEach((btn) => {
+        const isCurrent = btn.dataset.tool === zoomActiveTool;
+        btn.className = `zoom-tool-tab px-3 py-1.5 rounded-xl text-xs font-extrabold transition ${
+          isCurrent ? 'neu-pressed ring-2 ring-[#4F46E5] text-[#4F46E5]' : 'neu-btn text-[#44475B]'
+        }`;
+      });
+
+      document.getElementById('zoom-text-bar').classList.toggle('hidden', zoomActiveTool !== 'text');
+      document.getElementById('zoom-image-bar').classList.toggle('hidden', zoomActiveTool !== 'image');
+      document.getElementById('zoom-ocr-bar').classList.toggle('hidden', zoomActiveTool !== 'ocr');
+
+      if (zoomActiveTool !== 'ocr') {
+        zoomOcrResultPanel.classList.add('hidden');
+      } else if (zoomOcrLoading || zoomOcrBox || zoomOcrTextarea.value) {
+        zoomOcrResultPanel.classList.remove('hidden');
+      }
+      updateOcrMarqueeUI();
+
+      zoomImgPlaceHintEl.classList.toggle('hidden', !zoomImagePlacementArmed);
+      zoomImgRearmBtn.classList.toggle('hidden', zoomImagePlacementArmed || !zoomProcessedImgUrl);
+
+      const countEl = document.getElementById('zoom-active-count');
+      const clearBtn = document.getElementById('zoom-clear-active-btn');
+      if (zoomActiveTool === 'text') {
+        countEl.innerHTML = `글자: <strong class="text-[#4F46E5]">${(item.texts || []).length}</strong>개`;
+        clearBtn.textContent = '글자 모두 지우기';
+        clearBtn.classList.toggle('hidden', (item.texts || []).length === 0);
+      } else if (zoomActiveTool === 'image') {
+        countEl.innerHTML = `그림: <strong class="text-[#4F46E5]">${(item.images || []).length}</strong>개`;
+        clearBtn.textContent = '그림 모두 지우기';
+        clearBtn.classList.toggle('hidden', (item.images || []).length === 0);
+      } else if (zoomActiveTool === 'ocr') {
+        countEl.textContent = '범위 지정 OCR';
+        clearBtn.classList.add('hidden');
+      } else {
+        countEl.textContent = '보기 전용';
+        clearBtn.classList.add('hidden');
+      }
+
+      const canPlace =
+        zoomActiveTool === 'ocr' ||
+        (zoomActiveTool === 'text' && !!zoomTextInputEl.value.trim()) ||
+        (zoomActiveTool === 'image' && !!zoomProcessedImgUrl && zoomImagePlacementArmed);
+
+      zoomCanvasContainer.classList.toggle('cursor-crosshair', canPlace && !zoomDraggingOverlay && !zoomResizingImage);
+      zoomCanvasContainer.classList.toggle('cursor-default', !canPlace && !zoomDraggingOverlay && !zoomResizingImage);
+
+      const guideEl = document.getElementById('zoom-guide-text');
+      if (zoomActiveTool === 'text') {
+        guideEl.textContent = '글자 입력 후 문서 위를 클릭하면 삽입됩니다 (배치된 요소는 드래그 이동 가능)';
+      } else if (zoomActiveTool === 'image') {
+        guideEl.textContent = zoomProcessedImgUrl
+          ? (zoomImagePlacementArmed
+              ? '문서 위 원하는 위치를 클릭해 그림을 배치하세요'
+              : '배치된 그림을 드래그해 이동하거나 우측 하단(↘) 핸들을 끌어 크기를 바로 조절하세요')
+          : '상단 [그림/서명/도장 불러오기]로 이미지를 올린 뒤 원본·배경제거·흑백을 선택하세요';
+      } else if (zoomActiveTool === 'ocr') {
+        guideEl.textContent = '마우스로 드래그해 범위를 지정하면 문서 텍스트/이미지를 인식해 바로 복사할 수 있습니다';
+      } else {
+        guideEl.textContent = '문서를 확대하여 확인하는 모드입니다 (배치된 요소는 드래그 이동 및 크기 조절 가능)';
+      }
+    }
+
+    function renderZoomOverlays(item) {
+      zoomStampOverlay.innerHTML = '';
+      const overlayPointerClass = zoomActiveTool === 'ocr' ? 'pointer-events-none' : 'pointer-events-auto';
+
+      (item.images || []).forEach((imgMark, iIdx) => {
+        const isSelected = zoomSelectedImageId === imgMark.id || (zoomResizingImage && zoomResizingImage.id === imgMark.id);
+        const box = document.createElement('div');
+        box.className = `absolute ${overlayPointerClass} cursor-grab active:cursor-grabbing group rounded-sm transition-shadow ${
+          isSelected ? 'ring-2 ring-[#4F46E5]' : 'hover:ring-2 hover:ring-[#4F46E5]/70'
+        }`;
+        box.style.left = `${imgMark.xRatio * 100}%`;
+        box.style.top = `${imgMark.yRatio * 100}%`;
+        box.style.width = `${(imgMark.widthMm / 210) * 100}%`;
+        box.style.transform = 'translate(-50%, -50%)';
+        box.title = '드래그하여 위치 이동 · 우측 하단 핸들로 크기 조절';
+
+        const img = document.createElement('img');
+        img.src = imgMark.dataUrl;
+        img.className = 'w-full h-auto block pointer-events-none select-none';
+        box.appendChild(img);
+
+        const sizeBadge = document.createElement('span');
+        sizeBadge.className = `absolute -top-6 left-0 px-1.5 py-0.5 rounded bg-[#4F46E5] text-white text-[10px] font-extrabold shadow pointer-events-none whitespace-nowrap transition-opacity ${
+          isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        }`;
+        sizeBadge.textContent = `${imgMark.widthMm}mm`;
+        box.appendChild(sizeBadge);
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = `absolute -top-2.5 -right-2.5 w-5 h-5 rounded-full bg-rose-600 text-white text-[11px] font-black flex items-center justify-center shadow-md hover:scale-110 transition ${
+          isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        }`;
+        delBtn.textContent = '×';
+        delBtn.title = '그림 삭제';
+        delBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+        delBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          pushZoomHistory(item.id, clonePageSnapshot(item));
+          item.images.splice(iIdx, 1);
+          if (zoomSelectedImageId === imgMark.id) zoomSelectedImageId = null;
+          renderZoomOverlays(item);
+          updateZoomToolbarUI(item);
+        });
+        box.appendChild(delBtn);
+
+        const resizeHandle = document.createElement('div');
+        resizeHandle.className = `absolute -bottom-2 -right-2 w-4 h-4 rounded-sm bg-[#4F46E5] border-2 border-white shadow-md cursor-nwse-resize hover:scale-125 transition ${
+          isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        }`;
+        resizeHandle.title = '드래그하여 그림 크기 조절';
+        resizeHandle.addEventListener('mousedown', (e) => {
+          e.stopPropagation();
+          zoomSelectedImageId = imgMark.id;
+          zoomDragStartSnapshot = clonePageSnapshot(item);
+          zoomDragDidModify = false;
+          zoomResizingImage = { index: iIdx, id: imgMark.id };
+          renderZoomOverlays(item);
+        });
+        resizeHandle.addEventListener('click', (e) => e.stopPropagation());
+        box.appendChild(resizeHandle);
+
+        box.addEventListener('mousedown', (e) => {
+          e.stopPropagation();
+          zoomSelectedImageId = imgMark.id;
+          zoomDragStartSnapshot = clonePageSnapshot(item);
+          zoomDragDidModify = false;
+          zoomDraggingOverlay = { type: 'image', index: iIdx };
+          renderZoomOverlays(item);
+        });
+        box.addEventListener('click', (e) => e.stopPropagation());
+
+        zoomStampOverlay.appendChild(box);
+      });
+
+      (item.texts || []).forEach((textMark, tIdx) => {
+        const box = document.createElement('div');
+        box.className = `absolute ${overlayPointerClass} cursor-grab active:cursor-grabbing group hover:ring-2 hover:ring-[#4F46E5] rounded-sm`;
+        box.style.left = `${textMark.xRatio * 100}%`;
+        box.style.top = `${textMark.yRatio * 100}%`;
+        box.style.width = `${(textMark.widthMm / 210) * 100}%`;
+        box.style.transform = 'translate(-50%, -50%)';
+        box.title = `${textMark.text} (드래그하여 이동)`;
+
+        const img = document.createElement('img');
+        img.src = textMark.dataUrl;
+        img.className = 'w-full h-auto block pointer-events-none select-none';
+        box.appendChild(img);
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'opacity-0 group-hover:opacity-100 absolute -top-2.5 -right-2.5 w-5 h-5 rounded-full bg-rose-600 text-white text-[11px] font-black flex items-center justify-center shadow-md hover:scale-110 transition';
+        delBtn.textContent = '×';
+        delBtn.title = '글자 삭제';
+        delBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+        delBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          pushZoomHistory(item.id, clonePageSnapshot(item));
+          item.texts.splice(tIdx, 1);
+          renderZoomOverlays(item);
+          updateZoomToolbarUI(item);
+        });
+        box.appendChild(delBtn);
+
+        box.addEventListener('mousedown', (e) => {
+          e.stopPropagation();
+          zoomSelectedImageId = null;
+          zoomDragStartSnapshot = clonePageSnapshot(item);
+          zoomDragDidModify = false;
+          zoomDraggingOverlay = { type: 'text', index: tIdx };
+        });
+        box.addEventListener('click', (e) => e.stopPropagation());
+
+        zoomStampOverlay.appendChild(box);
+      });
+    }
+
+    function renderZoomModal() {
+      const idx = pageItems.findIndex(p => p.id === zoomedPageId);
+      const item = pageItems[idx];
+      if (!item) return;
+
+      document.getElementById('zoom-page-badge').textContent = `#${idx + 1} / ${pageItems.length}`;
+      document.getElementById('zoom-file-title').textContent = `${item.fileName} (p.${item.pageNumber})`;
+      document.getElementById('zoom-prev-btn').disabled = idx === 0;
+      document.getElementById('zoom-next-btn').disabled = idx === pageItems.length - 1;
+      document.getElementById('zoom-scale-label').textContent = `${Math.round(zoomModalScale * 100)}%`;
+
+      updateZoomToolbarUI(item);
+
+      zoomCanvasContainer.style.width = `${Math.min(720 * zoomModalScale, 1400)}px`;
+
+      if (zoomRenderTask) {
+        try { zoomRenderTask.cancel(); } catch (e) {}
+      }
+
+      const viewport = item.pdfjsPage.getViewport({ scale: 1.4 * zoomModalScale, rotation: item.rotation });
+      zoomCanvas.width = viewport.width;
+      zoomCanvas.height = viewport.height;
+      const ctx = zoomCanvas.getContext('2d');
+      zoomRenderTask = item.pdfjsPage.render({ canvasContext: ctx, viewport });
+      zoomRenderTask.promise.then(() => {
+        if (item.cropPercent > 0) {
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+          const trimW = zoomCanvas.width * (item.cropPercent / 100);
+          const trimH = zoomCanvas.height * (item.cropPercent / 100);
+          ctx.fillRect(0, 0, zoomCanvas.width, trimH);
+          ctx.fillRect(0, zoomCanvas.height - trimH, zoomCanvas.width, trimH);
+          ctx.fillRect(0, trimH, trimW, zoomCanvas.height - trimH * 2);
+          ctx.fillRect(zoomCanvas.width - trimW, trimH, trimW, zoomCanvas.height - trimH * 2);
+          ctx.strokeStyle = '#4F46E5';
+          ctx.setLineDash([8, 8]);
+          ctx.lineWidth = 3;
+          ctx.strokeRect(trimW, trimH, zoomCanvas.width - trimW * 2, zoomCanvas.height - trimH * 2);
+          ctx.setLineDash([]);
+        }
+      }).catch(() => {});
+
+      renderZoomOverlays(item);
+    }
+
+    document.querySelectorAll('.zoom-tool-tab').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        zoomActiveTool = btn.dataset.tool;
+        zoomHoverGhost.classList.add('hidden');
+        const item = pageItems.find(p => p.id === zoomedPageId);
+        if (item) {
+          renderZoomOverlays(item);
+          updateZoomToolbarUI(item);
+        }
+      });
+    });
+
+    // 범위 글자 인식 옵션 및 버튼 이벤트
+    document.querySelectorAll('.zoom-ocr-mode-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        zoomOcrMode = btn.dataset.ocrMode;
+        document.querySelectorAll('.zoom-ocr-mode-btn').forEach((b) => {
+          const active = b === btn;
+          b.className = `zoom-ocr-mode-btn px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition ${
+            active ? 'neu-pressed ring-2 ring-[#4F46E5] text-[#4F46E5]' : 'neu-flat-sm text-[#44475B]'
+          }`;
+        });
+      });
+    });
+    document.getElementById('zoom-ocr-recheck-top-btn').addEventListener('click', () => {
+      if (zoomOcrBox && !zoomOcrLoading) runZoomOcr(zoomOcrBox, true);
+    });
+    zoomOcrRetryBtn.addEventListener('click', () => {
+      if (zoomOcrBox && !zoomOcrLoading) runZoomOcr(zoomOcrBox, true);
+    });
+    document.getElementById('zoom-ocr-clear-btn').addEventListener('click', resetZoomOcrState);
+    zoomOcrCopyBtn.addEventListener('click', async () => {
+      const ok = await copyTextToClipboard(zoomOcrTextarea.value);
+      if (ok) {
+        zoomOcrCopyBtn.textContent = '✓ 복사 완료!';
+        setTimeout(() => { zoomOcrCopyBtn.textContent = '📋 글자 복사하기'; }, 2000);
+      }
+    });
+
+    // 실행 취소 / 다시 실행 버튼
+    zoomUndoBtn.addEventListener('click', undoZoomPage);
+    zoomRedoBtn.addEventListener('click', redoZoomPage);
+
+    // 글자 넣기 컨트롤 이벤트
+    zoomTextInputEl.addEventListener('input', refreshZoomTextPreview);
+    zoomTextFontEl.addEventListener('change', refreshZoomTextPreview);
+    zoomTextSizeEl.addEventListener('input', () => {
+      zoomTextSizeValEl.textContent = `${zoomTextSizeEl.value}pt`;
+      refreshZoomTextPreview();
+    });
+    zoomTextBoldBtn.addEventListener('click', () => {
+      zoomTextBold = !zoomTextBold;
+      zoomTextBoldBtn.className = zoomTextBold
+        ? 'neu-pressed ring-2 ring-[#4F46E5] text-[#4F46E5] px-2.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1'
+        : 'neu-flat-sm text-[#44475B] px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1';
+      refreshZoomTextPreview();
+    });
+    zoomTextItalicBtn.addEventListener('click', () => {
+      zoomTextItalic = !zoomTextItalic;
+      zoomTextItalicBtn.className = zoomTextItalic
+        ? 'neu-pressed ring-2 ring-[#4F46E5] text-[#4F46E5] px-2.5 py-1.5 rounded-xl text-xs font-bold italic flex items-center gap-1'
+        : 'neu-flat-sm text-[#44475B] px-2.5 py-1.5 rounded-xl text-xs font-bold italic flex items-center gap-1';
+      refreshZoomTextPreview();
+    });
+    document.querySelectorAll('.zoom-color-preset').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        zoomTextColor = btn.dataset.color;
+        zoomTextColorEl.value = zoomTextColor;
+        document.querySelectorAll('.zoom-color-preset').forEach((b) => {
+          b.classList.toggle('ring-2', b === btn);
+          b.classList.toggle('ring-[#4F46E5]', b === btn);
+        });
+        refreshZoomTextPreview();
+      });
+    });
+    zoomTextColorEl.addEventListener('input', () => {
+      zoomTextColor = zoomTextColorEl.value;
+      document.querySelectorAll('.zoom-color-preset').forEach((b) => {
+        b.classList.remove('ring-2', 'ring-[#4F46E5]');
+      });
+      refreshZoomTextPreview();
+    });
+
+    // 그림 넣기 컨트롤 이벤트
+    document.getElementById('zoom-image-upload-btn').addEventListener('click', () => zoomImgInputEl.click());
+    zoomImgInputEl.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        zoomRawImgUrl = ev.target.result;
+        zoomImagePlacementArmed = true;
+        await refreshZoomProcessedImage();
+        const item = pageItems.find(p => p.id === zoomedPageId);
+        if (item) updateZoomToolbarUI(item);
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    });
+    zoomImgRearmBtn.addEventListener('click', () => {
+      zoomImagePlacementArmed = true;
+      const item = pageItems.find(p => p.id === zoomedPageId);
+      if (item) updateZoomToolbarUI(item);
+    });
+    document.querySelectorAll('.zoom-img-filter').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        zoomImgFilterMode = btn.dataset.filter;
+        document.querySelectorAll('.zoom-img-filter').forEach((b) => {
+          const active = b === btn;
+          b.className = `zoom-img-filter px-2.5 py-1 rounded-xl text-[11px] font-bold transition ${
+            active ? 'neu-pressed ring-2 ring-[#4F46E5] text-[#4F46E5]' : 'neu-flat-sm text-[#44475B]'
+          }`;
+        });
+        await refreshZoomProcessedImage();
+      });
+    });
+    zoomImgThresholdEl.addEventListener('input', async () => {
+      zoomImgThreshold = parseInt(zoomImgThresholdEl.value, 10);
+      await refreshZoomProcessedImage();
+    });
+    zoomImgWidthEl.addEventListener('input', () => {
+      zoomImgWidthMm = parseInt(zoomImgWidthEl.value, 10);
+      zoomImgWidthValEl.textContent = `${zoomImgWidthMm}mm`;
+    });
+
+    // 캔버스 마우스 드래그 (범위 글자 인식) & 클릭(배치) & 호버 미리보기
+    zoomCanvasContainer.addEventListener('mousedown', (e) => {
+      if (zoomActiveTool !== 'ocr' || e.button !== 0 || !zoomedPageId) return;
+      e.preventDefault();
+      const rect = zoomCanvasContainer.getBoundingClientRect();
+      const startX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      const startY = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+      zoomOcrDraft = { startX, startY, curX: startX, curY: startY };
+      updateOcrMarqueeUI();
+    });
+
+    zoomCanvasContainer.addEventListener('click', (e) => {
+      if (zoomJustInteracted || !zoomedPageId || zoomActiveTool === 'ocr') return;
+      const item = pageItems.find(p => p.id === zoomedPageId);
+      if (!item) return;
+
+      const rect = zoomCanvasContainer.getBoundingClientRect();
+      const xRatio = (e.clientX - rect.left) / rect.width;
+      const yRatio = (e.clientY - rect.top) / rect.height;
+
+      if (zoomActiveTool === 'text') {
+        if (!zoomTextInputEl.value.trim() || !zoomTextPreview.dataUrl) return;
+        pushZoomHistory(item.id, clonePageSnapshot(item));
+        if (!item.texts) item.texts = [];
+        item.texts.push({
+          id: 'txt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          xRatio,
+          yRatio,
+          text: zoomTextInputEl.value,
+          dataUrl: zoomTextPreview.dataUrl,
+          widthMm: zoomTextPreview.widthMm
+        });
+      } else if (zoomActiveTool === 'image') {
+        if (!zoomProcessedImgUrl || !zoomImagePlacementArmed) {
+          zoomSelectedImageId = null;
+          renderZoomOverlays(item);
+          return;
+        }
+        pushZoomHistory(item.id, clonePageSnapshot(item));
+        if (!item.images) item.images = [];
+        const newId = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        item.images.push({
+          id: newId,
+          xRatio,
+          yRatio,
+          widthMm: zoomImgWidthMm,
+          dataUrl: zoomProcessedImgUrl
+        });
+        // 첫 클릭 배치 후 커서 미리보기 비활성화 + 바로 크기 조절할 수 있도록 선택
+        zoomImagePlacementArmed = false;
+        zoomSelectedImageId = newId;
+        zoomHoverGhost.classList.add('hidden');
+      } else {
+        zoomSelectedImageId = null;
+        renderZoomOverlays(item);
+        return;
+      }
+
+      renderZoomOverlays(item);
+      updateZoomToolbarUI(item);
+    });
+
+    zoomCanvasContainer.addEventListener('mousemove', (e) => {
+      if (zoomDraggingOverlay || zoomResizingImage || zoomOcrDraft) return;
+      if (zoomActiveTool === 'view' || zoomActiveTool === 'ocr' || (zoomActiveTool === 'image' && !zoomImagePlacementArmed)) {
+        zoomHoverGhost.classList.add('hidden');
+        return;
+      }
+
+      const rect = zoomCanvasContainer.getBoundingClientRect();
+      const xRatio = Math.max(0.01, Math.min(0.99, (e.clientX - rect.left) / rect.width));
+      const yRatio = Math.max(0.01, Math.min(0.99, (e.clientY - rect.top) / rect.height));
+
+      let ghostSrc = null;
+      let ghostWidthMm = 25;
+      if (zoomActiveTool === 'text' && zoomTextPreview.dataUrl) {
+        ghostSrc = zoomTextPreview.dataUrl;
+        ghostWidthMm = zoomTextPreview.widthMm;
+      } else if (zoomActiveTool === 'image' && zoomImagePlacementArmed && zoomProcessedImgUrl) {
+        ghostSrc = zoomProcessedImgUrl;
+        ghostWidthMm = zoomImgWidthMm;
+      }
+
+      if (!ghostSrc) {
+        zoomHoverGhost.classList.add('hidden');
+        return;
+      }
+
+      zoomHoverGhost.src = ghostSrc;
+      zoomHoverGhost.style.left = `${xRatio * 100}%`;
+      zoomHoverGhost.style.top = `${yRatio * 100}%`;
+      zoomHoverGhost.style.width = `${(ghostWidthMm / 210) * 100}%`;
+      zoomHoverGhost.style.transform = 'translate(-50%, -50%)';
+      zoomHoverGhost.classList.remove('hidden');
+    });
+
+    zoomCanvasContainer.addEventListener('mouseleave', () => {
+      zoomHoverGhost.classList.add('hidden');
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (zoomOcrDraft) {
+        const rect = zoomCanvasContainer.getBoundingClientRect();
+        zoomOcrDraft.curX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        zoomOcrDraft.curY = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+        updateOcrMarqueeUI();
+        return;
+      }
+      if (!zoomDraggingOverlay && !zoomResizingImage) return;
+      const item = pageItems.find(p => p.id === zoomedPageId);
+      if (!item) return;
+      const rect = zoomCanvasContainer.getBoundingClientRect();
+
+      if (zoomDraggingOverlay) {
+        zoomDragDidModify = true;
+        zoomJustInteracted = true;
+        const xRatio = Math.max(0.01, Math.min(0.99, (e.clientX - rect.left) / rect.width));
+        const yRatio = Math.max(0.01, Math.min(0.99, (e.clientY - rect.top) / rect.height));
+        if (zoomDraggingOverlay.type === 'text' && item.texts[zoomDraggingOverlay.index]) {
+          item.texts[zoomDraggingOverlay.index].xRatio = xRatio;
+          item.texts[zoomDraggingOverlay.index].yRatio = yRatio;
+        } else if (zoomDraggingOverlay.type === 'image' && item.images[zoomDraggingOverlay.index]) {
+          item.images[zoomDraggingOverlay.index].xRatio = xRatio;
+          item.images[zoomDraggingOverlay.index].yRatio = yRatio;
+        }
+        renderZoomOverlays(item);
+      } else if (zoomResizingImage) {
+        const targetImg = item.images[zoomResizingImage.index];
+        if (!targetImg) return;
+        zoomDragDidModify = true;
+        zoomJustInteracted = true;
+        const cxPx = targetImg.xRatio * rect.width;
+        const mouseXPx = e.clientX - rect.left;
+        const halfWidthPx = Math.abs(mouseXPx - cxPx);
+        const newWidthPx = Math.max(20, halfWidthPx * 2);
+        targetImg.widthMm = Math.max(10, Math.min(205, Math.round((newWidthPx / rect.width) * 210)));
+        renderZoomOverlays(item);
+      }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (zoomOcrDraft) {
+        const rect = zoomCanvasContainer.getBoundingClientRect();
+        const endX = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        const endY = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+        const x1 = Math.min(zoomOcrDraft.startX, endX);
+        const y1 = Math.min(zoomOcrDraft.startY, endY);
+        const x2 = Math.max(zoomOcrDraft.startX, endX);
+        const y2 = Math.max(zoomOcrDraft.startY, endY);
+        zoomOcrDraft = null;
+        zoomJustInteracted = true;
+        setTimeout(() => { zoomJustInteracted = false; }, 60);
+
+        if ((x2 - x1) * rect.width >= 10 && (y2 - y1) * rect.height >= 10) {
+          zoomOcrBox = { x1, y1, x2, y2 };
+          runZoomOcr(zoomOcrBox, false);
+        } else {
+          updateOcrMarqueeUI();
+        }
+        return;
+      }
+      if (zoomDraggingOverlay || zoomResizingImage) {
+        if (zoomDragDidModify && zoomDragStartSnapshot && zoomedPageId) {
+          pushZoomHistory(zoomedPageId, zoomDragStartSnapshot);
+          const item = pageItems.find(p => p.id === zoomedPageId);
+          if (item) updateZoomToolbarUI(item);
+        }
+        zoomDragStartSnapshot = null;
+        zoomDragDidModify = false;
+        zoomDraggingOverlay = null;
+        zoomResizingImage = null;
+        setTimeout(() => { zoomJustInteracted = false; }, 60);
+      }
+    });
+
+    document.getElementById('zoom-clear-active-btn').addEventListener('click', () => {
+      const item = pageItems.find(p => p.id === zoomedPageId);
+      if (!item) return;
+      pushZoomHistory(item.id, clonePageSnapshot(item));
+      if (zoomActiveTool === 'text') item.texts = [];
+      else if (zoomActiveTool === 'image') {
+        item.images = [];
+        zoomSelectedImageId = null;
+      }
+      renderZoomOverlays(item);
+      updateZoomToolbarUI(item);
+    });
+
+    document.getElementById('zoom-prev-btn').addEventListener('click', () => {
+      const idx = pageItems.findIndex(p => p.id === zoomedPageId);
+      if (idx > 0) {
+        zoomedPageId = pageItems[idx - 1].id;
+        zoomSelectedImageId = null;
+        resetZoomOcrState();
+        renderZoomModal();
+      }
+    });
+
+    document.getElementById('zoom-next-btn').addEventListener('click', () => {
+      const idx = pageItems.findIndex(p => p.id === zoomedPageId);
+      if (idx < pageItems.length - 1) {
+        zoomedPageId = pageItems[idx + 1].id;
+        zoomSelectedImageId = null;
+        resetZoomOcrState();
+        renderZoomModal();
+      }
+    });
+
+    document.getElementById('zoom-in-btn').addEventListener('click', () => {
+      zoomModalScale = Math.min(2.2, Number((zoomModalScale + 0.2).toFixed(2)));
+      renderZoomModal();
+    });
+
+    document.getElementById('zoom-out-btn').addEventListener('click', () => {
+      zoomModalScale = Math.max(0.6, Number((zoomModalScale - 0.2).toFixed(2)));
+      renderZoomModal();
+    });
+
+    document.getElementById('zoom-rotate-left-btn').addEventListener('click', () => {
+      const item = pageItems.find(p => p.id === zoomedPageId);
+      if (item) {
+        pushZoomHistory(item.id, clonePageSnapshot(item));
+        item.rotation = (item.rotation + 270) % 360;
+        resetZoomOcrState();
+        renderZoomModal();
+      }
+    });
+
+    document.getElementById('zoom-rotate-btn').addEventListener('click', () => {
+      const item = pageItems.find(p => p.id === zoomedPageId);
+      if (item) {
+        pushZoomHistory(item.id, clonePageSnapshot(item));
+        item.rotation = (item.rotation + 90) % 360;
+        resetZoomOcrState();
+        renderZoomModal();
+      }
+    });
+
+    document.getElementById('zoom-close-btn').addEventListener('click', closeZoomModal);
+    zoomModal.addEventListener('click', closeZoomModal);
+    zoomModalPanel.addEventListener('click', (e) => e.stopPropagation());
+    document.addEventListener('keydown', (e) => {
+      if (!zoomedPageId) return;
+      if (e.key === 'Escape') {
+        closeZoomModal();
+        return;
+      }
+      const tag = document.activeElement && document.activeElement.tagName;
+      if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT') return;
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) redoZoomPage();
+        else undoZoomPage();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        redoZoomPage();
       }
     });
   </script>
